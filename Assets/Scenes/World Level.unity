@@ -18,7 +18,7 @@ RenderSettings:
   m_Fog: 1
   m_FogColor: {r: 0.25490198, g: 0.25490198, b: 0.25490198, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.12
+  m_FogDensity: 0.03
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
@@ -1065,7 +1065,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -98.99991, y: 77.99994}
+  m_AnchoredPosition: {x: -99, y: 78}
   m_SizeDelta: {x: 80, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &648524639
@@ -3036,7 +3036,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1787479170}
   m_Layer: 0
-  m_Name: Camera RIg
+  m_Name: Camera Rig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8026,7 +8026,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &6605819243279676782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9308,8 +9308,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rat_mesh: {fileID: 704068125}
-  cameraRig: {fileID: 1787479170}
-  _animator: {fileID: 704068126}
+  camera_rig: {fileID: 1787479170}
   layer_mask:
     serializedVersion: 2
     m_Bits: 64
@@ -9341,6 +9340,7 @@ GameObject:
   - component: {fileID: 8552046713937180504}
   - component: {fileID: 4924197226874279531}
   - component: {fileID: 8552046713937180488}
+  - component: {fileID: 8552046713937180505}
   m_Layer: 6
   m_Name: Rat
   m_TagString: Player
@@ -9362,6 +9362,19 @@ CapsuleCollider:
   m_Height: 0.57496685
   m_Direction: 2
   m_Center: {x: -0.0027861595, y: 0.13135028, z: 0.10869664}
+--- !u!114 &8552046713937180505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8552046713937180503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56da5693964f441acb7cbe63164a23a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _animator: {fileID: 704068126}
 --- !u!1 &8557270149901635753
 GameObject:
   m_ObjectHideFlags: 0

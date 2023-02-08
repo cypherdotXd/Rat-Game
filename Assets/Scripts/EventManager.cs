@@ -12,7 +12,7 @@ public class EventManager : MonoBehaviour
     public static event Action jumpEvent;
     public static event Action<Vector2> touchMoved;
     public static event Action<float> dragHlEvent;
-    public static event Action<float> joystickMoveEvent;
+    public static event Action<float> joystickInputEvent;
     #endregion
 
     public void Awake()
@@ -34,9 +34,8 @@ public class EventManager : MonoBehaviour
     void Update()
     {
         if (inputActions.ratControls.jump.triggered) jumpEvent?.Invoke();
-        if (TouchInputManager.drag_Hl) dragHlEvent?.Invoke(TouchInputManager.touch_delta.x);
-        if(TouchInputManager.touch_in_R) touchMoved?.Invoke(TouchInputManager.touch_delta);
-        joystickMoveEvent?.Invoke(inputActions.ratControls.move.ReadValue<float>());
+        if(TouchInputManager.delta_R.magnitude > 0) touchMoved?.Invoke(TouchInputManager.delta_R);
+        joystickInputEvent?.Invoke(inputActions.ratControls.move.ReadValue<float>());
 
     }
 
