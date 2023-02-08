@@ -1350,12 +1350,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1345473177}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &704068126 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 1cfa1c48123524485a476f07e56adf0a,
-    type: 3}
-  m_PrefabInstance: {fileID: 1345473177}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &712662097
 GameObject:
   m_ObjectHideFlags: 0
@@ -2032,6 +2026,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1206819740}
   m_CullTransparentMesh: 1
+--- !u!95 &1209985228 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 1cfa1c48123524485a476f07e56adf0a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1345473177}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1300677622
 GameObject:
   m_ObjectHideFlags: 0
@@ -2292,10 +2292,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -493502334241836327, guid: 1cfa1c48123524485a476f07e56adf0a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: e8dbeff36f26d486fb877c8e2376e8d6, type: 2}
     - target: {fileID: 919132149155446097, guid: 1cfa1c48123524485a476f07e56adf0a,
         type: 3}
       propertyPath: m_Name
-      value: rat_inplace_rig
+      value: rat_model
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 1cfa1c48123524485a476f07e56adf0a,
         type: 3}
@@ -9374,7 +9379,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56da5693964f441acb7cbe63164a23a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 704068126}
+  _animator: {fileID: 1209985228}
 --- !u!1 &8557270149901635753
 GameObject:
   m_ObjectHideFlags: 0
