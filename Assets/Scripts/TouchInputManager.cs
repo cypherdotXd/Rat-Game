@@ -6,50 +6,67 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 
 public class TouchInputManager : MonoBehaviour
 {
-    [SerializeField] private RectTransform rect_R;
-    [SerializeField] private RectTransform rect_L;
+    [SerializeField] private RectTransform _rectR;
+    [SerializeField] private RectTransform _rectL;
 
-    static public bool touch_in_L;
-    static public bool touch_in_R;
+    static private bool _isTouchInL;
+    static private bool _isTouchInR;
 
-    static public Vector2 delta_L;
-    static public Vector2 delta_R;
+    static public Vector2 DeltaL { get; private set; }
+    static public Vector2 DeltaR { get; private set; }
 
-    [HideInInspector] public static bool drag_Hl;
-    [HideInInspector] public static bool drag_Vl;
+    static public Vector2 DistanceL;
+    static public Vector2 DistanceR;
 
-    [HideInInspector] public static Vector2 touch_position_last_frame = Vector2.zero;
+    static public Vector2 StartPositionL { get; private set; }
+    static public Vector2 StartPositionR { get; private set; }
 
-    protected void OnEnable()
+    public static PlayerControls.RatControlsActions InputMain;
+
+    private void Awake()
     {
-        EnhancedTouchSupport.Enable();
+        InputMain = new PlayerControls().ratControls;
     }
 
-    protected void OnDisable()
+    private void OnEnable()
     {
+        EnhancedTouchSupport.Enable();
+        InputMain.Enable();
+    }
+
+    private void OnDisable()
+    {
+
+        InputMain.Disable();
         EnhancedTouchSupport.Disable();
     }
 
     public void Update()
     {
-        // iterating over all the touches because there can be more than 1 touches on a smartphone screen
+        // iterating over all the touches
         foreach (Touch touch in Touch.activeTouches)
         {
-            if (touch.phase == TouchPhase.Canceled || touch.phase == TouchPhase.Ended || touch.isTap) {
-                delta_L = Vector2.zero;
-                delta_R = Vector2.zero;
+
+            if (touch.phase == TouchPhase.Canceled || touch.phase == TouchPhase.Ended || touch.isTap)
+            {
+                DeltaL = Vector2.zero;
+                DeltaR = Vector2.zero;
                 break;
             }
-            // check whether the current touch is in the left side or the right side of the screen
-            touch_in_L = RectTransformUtility.RectangleContainsScreenPoint(rect_L, touch.startScreenPosition);
 
-            if (touch_in_L) // data of touch of left part of the screen
+            // is current touch left or right
+            _isTouchInL = RectTransformUtility.RectangleContainsScreenPoint(_rectL, touch.startScreenPosition);
+
+            // differ b/w left finger and right finger touches
+            if (_isTouchInL)
             {
-                delta_L = touch.delta;
+                DeltaL = touch.delta;
+                DistanceL = touch.startScreenPosition - touch.startScreenPosition;
             }
-            else // data of touch of right part of the screen
+            else
             {
-                delta_R = touch.delta;
+                DeltaR = touch.delta;
+                DistanceR = touch.startScreenPosition - touch.startScreenPosition;
             }
         }
     }

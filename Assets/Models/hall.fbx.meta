@@ -1,88 +1,13 @@
 fileFormatVersion: 2
 guid: 291eb9181b0b94e30af09171b14c777b
 ModelImporter:
-  serializedVersion: 21202
+  serializedVersion: 21300
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material.007
-    second: {fileID: 2100000, guid: eef4ba748d9ed428d953285cda5180cf, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Tapete material
-    second: {fileID: 2100000, guid: f9d48ae9764424043bb28b4f595021fe, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: almira_mat
-    second: {fileID: 2100000, guid: d73fd5852a23e44bfb50f08805298931, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: bed_hinge_mat.001
-    second: {fileID: 2100000, guid: 9d50f6ba994ce4212b7726f6094e9c07, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: bed_wood_mat.001
-    second: {fileID: 2100000, guid: fbd55613197ac4998a7872fb7818fecc, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: coffee_table_mat
-    second: {fileID: 2100000, guid: 1e9d6e4b097b4404eb561becc964b200, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: hall_mat
-    second: {fileID: 2100000, guid: 5930a46c592154358a8e4394dfc7d017, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: laptop_mat.002
-    second: {fileID: 2100000, guid: 08b193feea85a456bb63fd216c0cbc31, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: pillow_1_mat.001
-    second: {fileID: 2100000, guid: ba8576d3b91af478b8ccfa527d0fc8b0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: room_mat.001
-    second: {fileID: 2100000, guid: 395441520dac24cefb9c0d8b205f6cc2, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: sock_2_mat.001
-    second: {fileID: 2100000, guid: bac5d56b593994162843a5ff6e182c1a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: sofa_mat
-    second: {fileID: 2100000, guid: 309112fbd634f4e0ead02f0b99803d02, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: table_mat.001
-    second: {fileID: 2100000, guid: bc0cd465619b3466c8f50f3f58b2275a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: tv_cabinet_mat
-    second: {fileID: 2100000, guid: d29190c8ab4b34cc4a758c315a05e70e, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: tv_mat
-    second: {fileID: 2100000, guid: e1310c3d52f2d48a59106893422ebfa1, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
-    materialName: 2
-    materialSearch: 2
+    materialName: 0
+    materialSearch: 1
     materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
@@ -111,7 +36,7 @@ ModelImporter:
   meshes:
     lODScreenPercentages: []
     globalScale: 1
-    meshCompression: 0
+    meshCompression: 2
     addColliders: 1
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
@@ -174,6 +99,7 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
