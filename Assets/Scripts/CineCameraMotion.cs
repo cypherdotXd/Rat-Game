@@ -17,18 +17,17 @@ public class CineCameraMotion : MonoBehaviour
 
     private void Update()
     {
-
         Vector2 lookInput = TouchInputManager.DeltaR;
 
         _cinemachine.m_XAxis.Value += 10f * _xLookSpeed * lookInput.x * Time.deltaTime;
         _cinemachine.m_YAxis.Value -= 0.1f * _yLookSpeed * lookInput.y * Time.deltaTime;
 
-        if(_time < _duration)
-        {
-            _cinemachine.m_XAxis.Value += 100f * _additionalAdjustment.x * Time.deltaTime;
-            _cinemachine.m_YAxis.Value -= _additionalAdjustment.y * Time.deltaTime;
-            _time += Time.deltaTime;
-        }
+        //if(_time < _duration)
+        //{
+        //    _cinemachine.m_XAxis.Value += 100f * _additionalAdjustment.x * Time.deltaTime;
+        //    _cinemachine.m_YAxis.Value -= _additionalAdjustment.y * Time.deltaTime;
+        //    _time += Time.deltaTime;
+        //}
     }
 
     public void AdjustCameraXY(float x, float y, float smoothTime)
