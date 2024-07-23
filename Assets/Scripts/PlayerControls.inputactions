@@ -1,5 +1,5 @@
 {
-    "name": "InputActions",
+    "name": "PlayerControls",
     "maps": [
         {
             "name": "ratControls",
@@ -22,6 +22,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "look",
+                    "type": "PassThrough",
+                    "id": "ca92e877-590e-41aa-a2c2-c3c5a80ffa98",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -101,6 +110,17 @@
                     "action": "move",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "6c2f3d56-fe89-4ce8-9a87-c2e166e8f729",
+                    "path": "<Touchscreen>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mobile;PC",
+                    "action": "look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

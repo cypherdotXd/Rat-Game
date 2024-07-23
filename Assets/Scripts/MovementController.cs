@@ -2,6 +2,7 @@ using System.Collections;
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using DG.Tweening;
 
 
 public class MovementController: MonoBehaviour
@@ -9,7 +10,9 @@ public class MovementController: MonoBehaviour
 	[Header("References")]
 	[SerializeField] private Transform ratMesh;
 	[SerializeField] private Transform cameraRig;
+
 	[Space(10)]
+
 	[SerializeField] private LayerMask _layerMask;
     private readonly float NORMAL_SPEED = 0.7f;
 	private readonly float ACCELERATION = 4f;
@@ -22,11 +25,11 @@ public class MovementController: MonoBehaviour
 	private Vector3 targetVelocity;
 
 	public bool isMoving = false;
+	public bool isClimbing = false;
 	private bool _isGrounded;
 	private bool isWallInFront;
 
     private float currentForwardSpeed = 0f;
-	private float wallClimbTimer = 0f;
 
 	private Rigidbody _rb;
 	private CapsuleCollider _collider;
@@ -39,7 +42,7 @@ public class MovementController: MonoBehaviour
 		_collider = GetComponent<CapsuleCollider>();
 		_rb = GetComponent<Rigidbody>();
 		_animationController = GetComponent<AnimationController>();
-        TouchInputManager.InputMain.jump.performed += ctx => JumpAndFall(ctx);
+        TouchInputManager.InputMain.jump.performed += ctx => DoJump(ctx);
     }
 
     // Update is called once per frame
@@ -56,7 +59,6 @@ public class MovementController: MonoBehaviour
     {
         _isGrounded = Physics.Raycast(_collider.bounds.center, -transform.up, _collider.bounds.extents.y + 0.01f, ~_layerMask);
         isWallInFront = Physics.Raycast(_collider.bounds.center - _collider.bounds.extents.y * Vector3.up, transform.forward, out wallHitinfo, _collider.bounds.extents.z + 0.1f, ~_layerMask);
-		WallClimb();
     }
 
     private void WalkAndRun(float inputY)
@@ -67,9 +69,12 @@ public class MovementController: MonoBehaviour
     private void MoveWihtSpeed(float speed, float threshold, float acceleration)
 	{
         bool canMove = threshold != 0;
-		
-		currentForwardSpeed = Mathf.Lerp(currentForwardSpeed, threshold * speed, acceleration * Time.deltaTime);
-		_animationController.PlayWalkRunAnimation(currentForwardSpeed / speed);
+
+		if (isClimbing)
+			return;
+
+        currentForwardSpeed = Mathf.Lerp(currentForwardSpeed, threshold * speed, acceleration * Time.deltaTime);
+		_animationController.ChangeMoveState(currentForwardSpeed / speed);
 		if (canMove) {
 			//isMoving = true;
 			targetVelocity = SPEED_MULTIPLIER * currentForwardSpeed * transform.forward;
@@ -88,48 +93,63 @@ public class MovementController: MonoBehaviour
 		}
 	}
 	    
-	private void JumpAndFall(InputAction.CallbackContext ctx)
+	private void DoJump(InputAction.CallbackContext _)
 	{
 		//Jump only when grounded
 		if (!_isGrounded)
 			return;
 		_rb.velocity = Mathf.Sqrt(MAX_JUMP_HEIGHT * 16f) * Vector3.up;
-	}
 
-	void WallClimb()
+		StartCoroutine(TryWallClimb());
+    }
+
+	private IEnumerator TryWallClimb(float delay = 0.1f)
 	{
-		bool canClimbWall = isWallInFront && wallClimbTimer < CLIMB_TIMEOUT;
-		if (canClimbWall)
+		yield return new WaitForSeconds(delay);
+		while (!_isGrounded)
 		{
+			print("check");
+			if (isWallInFront)
+			{
+				yield return StartCoroutine(WallClimb(CLIMB_TIMEOUT));
+				break;
+			}
+
+            yield return null;
+		}
+    }
+
+	private IEnumerator WallClimb(float time)
+	{
+		float timer = 0;
+		
+		// Rotate mesh(not this rb) parallel to surface
+		Vector3 normal = wallHitinfo.normal;
+		float angle = Vector3.SignedAngle(transform.up, normal, transform.right);
+		Vector3 lastRot = ratMesh.localEulerAngles;
+		ratMesh.DOLocalRotate(angle * Vector3.right, 0.2f);
+        print("climb start");
+		isClimbing = true;
+
+        _animationController.PlayWalkRunAnimation(1.5f);
+        while (timer < time && isWallInFront)
+		{
+			timer += Time.deltaTime;
 			if (_isGrounded)
-				return;
-			wallClimbTimer += Time.fixedDeltaTime;
-			_animationController.PlayClimbingAnimation(true);
-			// Rotate mesh(not this rb) parallel to surface
-            Vector3 normal = wallHitinfo.normal;
-            float angle = Vector3.SignedAngle(transform.up, normal, transform.right);
-			ratMesh.localEulerAngles = angle * wallClimbTimer * Vector3.right / CLIMB_TIMEOUT;
+				break;
 
 			// Move Upward
 			_rb.velocity = CLIMB_FORCE * Mathf.Sqrt(MAX_JUMP_HEIGHT * 2f * 8f) * Vector3.up;
-		}
 
-		// Stop Climbing
-		if (!canClimbWall)
-		{
-            _animationController.PlayClimbingAnimation(false);
-			if(wallClimbTimer > 0)
-			{
-				_rb.velocity += 0.9f * transform.forward;
-			}
-            if (wallClimbTimer > CLIMB_TIMEOUT)
-			{
-				_rb.velocity = -0.6f * Mathf.Sqrt(MAX_JUMP_HEIGHT * 2f * 9.8f) * transform.forward;
-			}
+			yield return null;
 
-			wallClimbTimer = 0f;
-            ratMesh.localEulerAngles = 0.00f * wallClimbTimer * Vector3.right / CLIMB_TIMEOUT;
 		}
-	}
+		isClimbing = false;
+        print("climb end");
+		_rb.AddForce((transform.forward + transform.up).normalized * 1, ForceMode.Impulse);
+        ratMesh.DOLocalRotate(lastRot, 0.3f);
+        _animationController.PlayWalkRunAnimation(1f);
+
+    }
 
 }

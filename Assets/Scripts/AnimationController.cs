@@ -9,7 +9,6 @@ public class AnimationController : MonoBehaviour
 
 	private readonly float CLIMB_TIMEOUT = 0.4f;
     private float _moveAnimState;
-    private float wallClimbTimer = 0f;
 
     private bool _isJumping;
     private bool _isFalling;
@@ -19,33 +18,24 @@ public class AnimationController : MonoBehaviour
     private Rigidbody _rb;
     private Collider _collider;
 
-    private int forward_motion_state_id = 0;
-    private int is_jumping_id = 0;
-    private int is_falling_id = 0;
-    private int is_landing_id = 0;
-    private int is_climbing_id = 0;
+    private int moveState_id = 0;
+    private int isJumping_id = 0;
+    private int isFalling_id = 0;
+    private int isLanding_id = 0;
+    private int isClimbing_id = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
-        forward_motion_state_id = Animator.StringToHash("forward_motion_state");
-        is_jumping_id  = Animator.StringToHash("is_jumping");
-        is_falling_id  = Animator.StringToHash("is_falling");
-        is_landing_id  = Animator.StringToHash("is_landing");
-        is_climbing_id = Animator.StringToHash("is_climbing");
-    }
+        moveState_id = Animator.StringToHash("forward_motion_state");
+        isJumping_id  = Animator.StringToHash("is_jumping");
+        isFalling_id  = Animator.StringToHash("is_falling");
+        isLanding_id  = Animator.StringToHash("is_landing");
+        isClimbing_id = Animator.StringToHash("is_climbing");
 
-    // Update is called once per frame
-    void Update()
-    {
-
-        _animator.SetFloat(forward_motion_state_id, _moveAnimState);
-        _animator.SetBool(is_jumping_id,  _isJumping);
-        _animator.SetBool(is_falling_id,  _isFalling);
-        _animator.SetBool(is_landing_id,  _isLanding);
-        _animator.SetBool(is_climbing_id, _isClimbing);
+        PlayWalkRunAnimation(1);
     }
 
     private void FixedUpdate()
@@ -60,9 +50,17 @@ public class AnimationController : MonoBehaviour
 
     }
 
-    public void PlayWalkRunAnimation(float threshold)
+    public void PlayWalkRunAnimation(float threshold = 1)
+    {
+        _animator.SetTrigger("MoveOnGround");
+        _moveAnimState = threshold;
+        _animator.SetFloat(moveState_id, _moveAnimState);
+    }
+
+    public void ChangeMoveState(float threshold)
     {
         _moveAnimState = threshold;
+        _animator.SetFloat(moveState_id, _moveAnimState);
     }
 
     public bool PlayJumpAnimation()
@@ -74,12 +72,4 @@ public class AnimationController : MonoBehaviour
         return _isGrounded;
     }
 
-    public void PlayClimbingAnimation(bool value)
-    {
-        _isClimbing = value;
-        if (value)
-        {
-            PlayWalkRunAnimation(1);
-        }
-    }
 }
