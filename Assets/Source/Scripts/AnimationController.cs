@@ -43,10 +43,10 @@ public class StateController : MonoBehaviour
     {
         // animation bools
         _isFalling = !_isGrounded && _rb.velocity.y < 0.0f;
-
+        _animator.SetBool(isFalling_id, _isFalling && !_isLanding && !_isJumping);
         // Raycasts
-        _isGrounded = Physics.Raycast(_collider.bounds.center, -transform.up, _collider.bounds.extents.y + 0.01f, ~_layerMask);
-        _isLanding = Physics.Raycast(_collider.bounds.center, -transform.up, _collider.bounds.extents.y + 0.9f, ~_layerMask) && _isFalling;
+        _isGrounded = Physics.Raycast(_collider.bounds.center, -transform.up, _collider.bounds.extents.y + 0.03f, ~_layerMask);
+        _isLanding = Physics.Raycast(_collider.bounds.center, -transform.up, _collider.bounds.extents.y + 1.1f, ~_layerMask) && _isFalling;
 
 
     }

@@ -149,7 +149,7 @@ public class MovementController: MonoBehaviour
 
 			// Move Upward
 			_rb.velocity = CLIMB_FORCE * Mathf.Sqrt(MAX_JUMP_HEIGHT * 2f * 8f) * Vector3.up;
-
+			transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-wallHitinfo.normal), 12 * Time.deltaTime);
 			yield return null;
 
 		}
