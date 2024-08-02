@@ -8499,13 +8499,13 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 0
-  NORMAL_SPEED: 0.7
-  ACCELERATION: 4
-  SPEED_MULTIPLIER: 1
-  MAX_JUMP_HEIGHT: 0.45
-  CLIMB_TIMEOUT: 1
-  CLIMB_FORCE: 0.6
-  TURN_ACC: 10
+  walkSpeed: 0.6
+  acceleration: 4
+  speedMultiplier: 1
+  maxJumpHeight: 0.4
+  climbTimeout: 0.5
+  climbForce: 0.6
+  turnAcceleration: 10
   isMoving: 0
   isClimbing: 0
 --- !u!4 &8552046713937180491

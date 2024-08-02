@@ -14,13 +14,13 @@ public class MovementController: MonoBehaviour
 	[Space(10)]
 
 	[SerializeField] private LayerMask _layerMask;
-    [SerializeField] float NORMAL_SPEED = 0.7f;
-	[SerializeField] float ACCELERATION = 4f;
-	[SerializeField] float SPEED_MULTIPLIER = 1f;
-	[SerializeField] float MAX_JUMP_HEIGHT = 0.4f;
-	[SerializeField] float CLIMB_TIMEOUT = 0.5f;
-	[SerializeField] float CLIMB_FORCE = 0.6f;
-	[SerializeField] float TURN_ACC = 10f;
+    [SerializeField] float walkSpeed = 0.7f;
+	[SerializeField] float acceleration = 4f;
+	[SerializeField] float speedMultiplier = 1f;
+	[SerializeField] float maxJumpHeight = 0.4f;
+	[SerializeField] float climbTimeout = 0.5f;
+	[SerializeField] float climbForce = 0.6f;
+	[SerializeField] float turnAcceleration = 10f;
 
 	private Vector3 targetVelocity;
 
@@ -68,7 +68,8 @@ public class MovementController: MonoBehaviour
 
     private void WalkAndRun(Vector2 input)
 	{
-		MoveWihtSpeed(NORMAL_SPEED, input, ACCELERATION);
+		
+		MoveWihtSpeed(walkSpeed, input, acceleration);
 	}
 
     private void MoveWihtSpeed(float speed, Vector2 input, float acceleration)
@@ -78,23 +79,15 @@ public class MovementController: MonoBehaviour
 		if (isClimbing)
 			return;
 
-        currentForwardSpeed = Mathf.Lerp(currentForwardSpeed, input.sqrMagnitude * speed, acceleration * Time.deltaTime);
+
+		currentForwardSpeed = Mathf.Lerp(currentForwardSpeed, input.sqrMagnitude * speed, acceleration * Time.deltaTime);
 		if (canMove) {
 			//isMoving = true;
-			targetVelocity = SPEED_MULTIPLIER * currentForwardSpeed * transform.forward;
+			targetVelocity = speedMultiplier * currentForwardSpeed * transform.forward;
 			targetVelocity.y = _rb.velocity.y;
 			_rb.velocity = targetVelocity;
 		}
-
-		if (_sprintToggle)
-		{
-			SPEED_MULTIPLIER = 1.5f;
-		}
-		else
-		{
-            SPEED_MULTIPLIER = 1f;
-		}
-        _animationController.ChangeMoveState(SPEED_MULTIPLIER * currentForwardSpeed / speed);
+        _animationController.ChangeMoveState(speedMultiplier * currentForwardSpeed / speed);
 
 		// Rotate towards camera forward direction when moving
 		if(input.y != 0)
@@ -105,14 +98,14 @@ public class MovementController: MonoBehaviour
 			float yAngle = Mathf.Atan2(input.x, input.y);
 			targetRotation *= Quaternion.Euler(0, Mathf.Rad2Deg * yAngle, 0);
 
-            _rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, TURN_ACC * Time.deltaTime));
+            _rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, turnAcceleration * Time.deltaTime));
 		}
 	}
 
     void ToggleSprint(InputAction.CallbackContext _)
 	{
 		_sprintToggle = !_sprintToggle;
-
+		speedMultiplier = _sprintToggle ? 1.3f : 1;
     }
 
 
@@ -130,7 +123,7 @@ public class MovementController: MonoBehaviour
 	IEnumerator JumpDelayed(float delay = 0.1f)
 	{
 		yield return new WaitForSeconds(delay);
-		_rb.velocity = Mathf.Sqrt(MAX_JUMP_HEIGHT * 16f) * Vector3.up;
+		_rb.velocity = Mathf.Sqrt(maxJumpHeight * 16f) * Vector3.up;
         StartCoroutine(TryWallClimb());
     }
 
@@ -141,7 +134,7 @@ public class MovementController: MonoBehaviour
 		{
 			if (isWallInFront)
 			{
-				yield return StartCoroutine(WallClimb(CLIMB_TIMEOUT));
+				yield return StartCoroutine(WallClimb(climbTimeout));
 				print(wallHitinfo.distance);
 				break;
 			}
@@ -171,7 +164,7 @@ public class MovementController: MonoBehaviour
 				break;
 
 			// Move Upward
-			_rb.velocity = CLIMB_FORCE * Mathf.Sqrt(MAX_JUMP_HEIGHT * 2f * 8f) * Vector3.up;
+			_rb.velocity = climbForce * Mathf.Sqrt(maxJumpHeight * 2f * 8f) * Vector3.up;
 			transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-wallHitinfo.normal), 12 * Time.deltaTime);
 			yield return null;
 
