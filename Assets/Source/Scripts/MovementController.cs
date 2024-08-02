@@ -26,6 +26,7 @@ public class MovementController: MonoBehaviour
 
 	public bool isMoving = false;
 	public bool isClimbing = false;
+	private bool _sprintToggle = false;
 	private bool _isGrounded;
 	private bool isWallInFront;
 
@@ -42,7 +43,9 @@ public class MovementController: MonoBehaviour
 		_collider = GetComponent<CapsuleCollider>();
 		_rb = GetComponent<Rigidbody>();
 		_animationController = GetComponent<StateController>();
+
         TouchInputManager.InputMain.jump.performed += ctx => DoJump(ctx);
+		TouchInputManager.InputMain.sprint.performed += ctx => ToggleSprint(ctx);
     }
 
     // Update is called once per frame
@@ -58,7 +61,9 @@ public class MovementController: MonoBehaviour
 	private void FixedUpdate()
     {
         _isGrounded = Physics.Raycast(_collider.bounds.center, -transform.up, _collider.bounds.extents.y + 0.01f, ~_layerMask);
-        isWallInFront = Physics.Raycast(_collider.bounds.center - _collider.bounds.extents.y * Vector3.up, transform.forward, out wallHitinfo, _collider.bounds.extents.z + 0.1f, ~_layerMask);
+        isWallInFront = Physics.Raycast(_collider.bounds.center - _collider.bounds.extents.y * Vector3.up, transform.forward, out wallHitinfo, _collider.bounds.extents.z + 0.05f, ~_layerMask);
+		if(isWallInFront)
+			Debug.DrawRay(_collider.bounds.center - _collider.bounds.extents.y * Vector3.up, transform.forward, Color.cyan, 6);
     }
 
     private void WalkAndRun(Vector2 input)
@@ -74,13 +79,22 @@ public class MovementController: MonoBehaviour
 			return;
 
         currentForwardSpeed = Mathf.Lerp(currentForwardSpeed, input.sqrMagnitude * speed, acceleration * Time.deltaTime);
-		_animationController.ChangeMoveState(currentForwardSpeed / speed);
 		if (canMove) {
 			//isMoving = true;
 			targetVelocity = SPEED_MULTIPLIER * currentForwardSpeed * transform.forward;
 			targetVelocity.y = _rb.velocity.y;
 			_rb.velocity = targetVelocity;
 		}
+
+		if (_sprintToggle)
+		{
+			SPEED_MULTIPLIER = 1.5f;
+		}
+		else
+		{
+            SPEED_MULTIPLIER = 1f;
+		}
+        _animationController.ChangeMoveState(SPEED_MULTIPLIER * currentForwardSpeed / speed);
 
 		// Rotate towards camera forward direction when moving
 		if(input.y != 0)
@@ -94,8 +108,15 @@ public class MovementController: MonoBehaviour
             _rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, TURN_ACC * Time.deltaTime));
 		}
 	}
-	    
-	private void DoJump(InputAction.CallbackContext _)
+
+    void ToggleSprint(InputAction.CallbackContext _)
+	{
+		_sprintToggle = !_sprintToggle;
+
+    }
+
+
+    private void DoJump(InputAction.CallbackContext _)
 	{
 		//Jump only when grounded
 		if (!_isGrounded)
@@ -121,6 +142,7 @@ public class MovementController: MonoBehaviour
 			if (isWallInFront)
 			{
 				yield return StartCoroutine(WallClimb(CLIMB_TIMEOUT));
+				print(wallHitinfo.distance);
 				break;
 			}
 
@@ -137,7 +159,8 @@ public class MovementController: MonoBehaviour
 		float angle = Vector3.SignedAngle(transform.up, normal, transform.right);
 		Vector3 lastRot = ratMesh.localEulerAngles;
 		ratMesh.DOLocalRotate(angle * Vector3.right, 0.2f);
-        print("climb start");
+		ratMesh.DOLocalMoveZ(0.08f, 0.2f);
+		print("climb start");
 		isClimbing = true;
 
         _animationController.PlayWalkRunAnimation(1.5f);
@@ -161,6 +184,7 @@ public class MovementController: MonoBehaviour
         isClimbing = false;
         print("climb end");
         ratMesh.DOLocalRotate(lastRot, 0.3f);
+        ratMesh.DOLocalMoveZ(0f, 0.2f);
         _animationController.PlayWalkRunAnimation(1f);
 
     }
