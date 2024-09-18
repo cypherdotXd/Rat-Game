@@ -31,15 +31,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "sprint",
-                    "type": "Value",
-                    "id": "70262480-ef1e-4ad2-8384-fb90462d8a8a",
-                    "expectedControlType": "Button",
-                    "processors": "Invert",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -83,39 +74,6 @@
                     "interactions": "",
                     "processors": "Scale(factor=1.5)",
                     "groups": "Mobile;PC",
-                    "action": "move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "Down",
-                    "id": "802f0e98-e72e-4376-8202-39ede31ad096",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "Left",
-                    "id": "f8177f41-3563-435c-a9d3-85ff92298ea0",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "Right",
-                    "id": "13445c43-6f25-42a4-9e2b-0acafeabf2cf",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
                     "action": "move",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -194,17 +152,6 @@
                     "processors": "",
                     "groups": "Mobile;PC",
                     "action": "look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "f4615fcc-9928-41e4-9101-1e51c761c365",
-                    "path": "<Keyboard>/shift",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "PC;Mobile",
-                    "action": "sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

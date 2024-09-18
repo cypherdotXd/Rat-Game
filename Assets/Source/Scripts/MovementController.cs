@@ -45,7 +45,6 @@ public class MovementController: MonoBehaviour
 		_animationController = GetComponent<StateController>();
 
         TouchInputManager.InputMain.jump.performed += ctx => DoJump(ctx);
-		TouchInputManager.InputMain.sprint.performed += ctx => ToggleSprint(ctx);
     }
 
     // Update is called once per frame
@@ -102,13 +101,6 @@ public class MovementController: MonoBehaviour
 		}
 	}
 
-    void ToggleSprint(InputAction.CallbackContext _)
-	{
-		_sprintToggle = !_sprintToggle;
-		speedMultiplier = _sprintToggle ? 1.3f : 1;
-    }
-
-
     private void DoJump(InputAction.CallbackContext _)
 	{
 		//Jump only when grounded
@@ -135,7 +127,6 @@ public class MovementController: MonoBehaviour
 			if (isWallInFront)
 			{
 				yield return StartCoroutine(WallClimb(climbTimeout));
-				print(wallHitinfo.distance);
 				break;
 			}
 

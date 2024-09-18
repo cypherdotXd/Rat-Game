@@ -53,15 +53,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""sprint"",
-                    ""type"": ""Value"",
-                    ""id"": ""70262480-ef1e-4ad2-8384-fb90462d8a8a"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": ""Invert"",
-                    ""interactions"": """",
-                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -105,39 +96,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": ""Scale(factor=1.5)"",
                     ""groups"": ""Mobile;PC"",
-                    ""action"": ""move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""Down"",
-                    ""id"": ""802f0e98-e72e-4376-8202-39ede31ad096"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""Left"",
-                    ""id"": ""f8177f41-3563-435c-a9d3-85ff92298ea0"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""Right"",
-                    ""id"": ""13445c43-6f25-42a4-9e2b-0acafeabf2cf"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
                     ""action"": ""move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -218,17 +176,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""f4615fcc-9928-41e4-9101-1e51c761c365"",
-                    ""path"": ""<Keyboard>/shift"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""PC;Mobile"",
-                    ""action"": ""sprint"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -268,7 +215,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_ratControls_jump = m_ratControls.FindAction("jump", throwIfNotFound: true);
         m_ratControls_move = m_ratControls.FindAction("move", throwIfNotFound: true);
         m_ratControls_look = m_ratControls.FindAction("look", throwIfNotFound: true);
-        m_ratControls_sprint = m_ratControls.FindAction("sprint", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -333,7 +279,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_ratControls_jump;
     private readonly InputAction m_ratControls_move;
     private readonly InputAction m_ratControls_look;
-    private readonly InputAction m_ratControls_sprint;
     public struct RatControlsActions
     {
         private @PlayerControls m_Wrapper;
@@ -341,7 +286,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @jump => m_Wrapper.m_ratControls_jump;
         public InputAction @move => m_Wrapper.m_ratControls_move;
         public InputAction @look => m_Wrapper.m_ratControls_look;
-        public InputAction @sprint => m_Wrapper.m_ratControls_sprint;
         public InputActionMap Get() { return m_Wrapper.m_ratControls; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -360,9 +304,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @look.started += instance.OnLook;
             @look.performed += instance.OnLook;
             @look.canceled += instance.OnLook;
-            @sprint.started += instance.OnSprint;
-            @sprint.performed += instance.OnSprint;
-            @sprint.canceled += instance.OnSprint;
         }
 
         private void UnregisterCallbacks(IRatControlsActions instance)
@@ -376,9 +317,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @look.started -= instance.OnLook;
             @look.performed -= instance.OnLook;
             @look.canceled -= instance.OnLook;
-            @sprint.started -= instance.OnSprint;
-            @sprint.performed -= instance.OnSprint;
-            @sprint.canceled -= instance.OnSprint;
         }
 
         public void RemoveCallbacks(IRatControlsActions instance)
@@ -419,6 +357,5 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
         void OnLook(InputAction.CallbackContext context);
-        void OnSprint(InputAction.CallbackContext context);
     }
 }
