@@ -1,264 +1,9 @@
 fileFormatVersion: 2
 guid: fe8219bc5a67c4727a2972daa6774cee
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Book
-    second: {fileID: 2100000, guid: 799ee755d12c64f92bb929001a87db4b, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Bottle
-    second: {fileID: 2100000, guid: 1bad280b940024a67b57927b9469e20c, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Bottle Colour
-    second: {fileID: 2100000, guid: a34460d48f5dd4ee7864f174dfd83d94, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Bucket
-    second: {fileID: 2100000, guid: 4233185f95ca94cb1866b6d21e921dfb, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Bucket.001
-    second: {fileID: 2100000, guid: d00510ed0fe004e559ce9aad775ecde4, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Bucket.002
-    second: {fileID: 2100000, guid: 9314f4de9e09a47e294cbe855ec5cb47, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Drain.001
-    second: {fileID: 2100000, guid: c635b302f326840e99dc94466f29b8dc, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Faucet_Handle
-    second: {fileID: 2100000, guid: 30334b4ba3bcf460488b60225e32559d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Faucet_Metal
-    second: {fileID: 2100000, guid: f233df3e2c60b444783a0a8c9f270eba, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Faucet_Tape
-    second: {fileID: 2100000, guid: c6c29dc1ca9254a35a328040f0917db0, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Floor
-    second: {fileID: 2100000, guid: 96b45635ba6b24368b0ab84a4bea9dbd, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: FloorMat
-    second: {fileID: 2100000, guid: 0955e9eda9916497692e8fe328e019b7, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Glass black
-    second: {fileID: 2100000, guid: 1612e267df7b2486aadfb5970174e7ee, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material
-    second: {fileID: 2100000, guid: 0c4dde3c4f3504c31b84bc643db451ca, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material.001
-    second: {fileID: 2100000, guid: f2db2322f0d334aa7904f72f8e88b5a8, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material.002
-    second: {fileID: 2100000, guid: a7c633bda6eef466e89d14a68e48efc9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material.007
-    second: {fileID: 2100000, guid: eef4ba748d9ed428d953285cda5180cf, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: PLastic black
-    second: {fileID: 2100000, guid: 7b058223dba3247d58a1bd99801f47c7, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: PhotoFrame
-    second: {fileID: 2100000, guid: 74b1fad5d36ba481bb335f3536deca4b, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Soap.001
-    second: {fileID: 2100000, guid: 13909fc5005fa4416ae39543028ddea4, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Switch_Led
-    second: {fileID: 2100000, guid: 625c1e442ec814282833c88b7022a785, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Switch_White Plastic
-    second: {fileID: 2100000, guid: d4f21d7541f73442395cf1fa356f4656, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Tapete material
-    second: {fileID: 2100000, guid: f9d48ae9764424043bb28b4f595021fe, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: WoodBoard
-    second: {fileID: 2100000, guid: f7c09c3040be34ec39867141f65b7716, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: almira_mat.002
-    second: {fileID: 2100000, guid: 249e4ffaf37a2487aba40596707554d3, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: bathroom_mat
-    second: {fileID: 2100000, guid: deea8f627e42b42c4a59769d26ba59af, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: bed_hinge_mat.002
-    second: {fileID: 2100000, guid: e905ee85718f2425080ec146a1b21eef, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: bed_wood_mat.002
-    second: {fileID: 2100000, guid: 36122e8989a24412c9680dafbb742bbc, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: ceramic.002
-    second: {fileID: 2100000, guid: 7bfb573d1454348619f5f1c696e58bd5, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: coffee_table_mat
-    second: {fileID: 2100000, guid: 1e9d6e4b097b4404eb561becc964b200, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: fan_body_mat.001
-    second: {fileID: 2100000, guid: dbd7d651e6d1f4fb7b0e0cdbe575bffb, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: hall_mat
-    second: {fileID: 2100000, guid: 5930a46c592154358a8e4394dfc7d017, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: hall_mat.001
-    second: {fileID: 2100000, guid: 1edb0d25774e0437481f0a892944db45, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: hallway_mat
-    second: {fileID: 2100000, guid: 2402aea2cee38454ea5675dfae80288d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: kitchen_mat
-    second: {fileID: 2100000, guid: 1393bf22dc08544ffb19a4343507d14e, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: laptop_mat.001
-    second: {fileID: 2100000, guid: d769455e58ed14ee3b16721ae747987b, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: mouse
-    second: {fileID: 2100000, guid: 1e69abdd9431a402ba1e1389ce863ff4, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: pillow_1_mat.002
-    second: {fileID: 2100000, guid: 27cd5ab58df8e45b6a3ed232efab9b59, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: pipe02_mat
-    second: {fileID: 2100000, guid: cffeae15d29554d72b44e17759b63598, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: pipe_mat
-    second: {fileID: 2100000, guid: ad553739f2f6a42f88d6aadd1a199cd9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: pipe_mat.001
-    second: {fileID: 2100000, guid: 97bd3674b27034990a324802fb08922d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: room_mat.002
-    second: {fileID: 2100000, guid: f439eb0bf98524d608b77ad45e001e5d, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: sock_2_mat.002
-    second: {fileID: 2100000, guid: 6ee2f8757c4374cfa81cc2c303354243, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: sofa_mat
-    second: {fileID: 2100000, guid: 309112fbd634f4e0ead02f0b99803d02, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: table_mat.002
-    second: {fileID: 2100000, guid: d474401f74fd64ce4b1f53e9538a5ff6, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: tubelight_mat.001
-    second: {fileID: 2100000, guid: b6ee32312d7954b7a9dc7fc59f022f54, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: tv_cabinet_mat
-    second: {fileID: 2100000, guid: d29190c8ab4b34cc4a758c315a05e70e, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: tv_mat
-    second: {fileID: 2100000, guid: e1310c3d52f2d48a59106893422ebfa1, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: washing_machine_mat
-    second: {fileID: 2100000, guid: c48fb87a131d24027b297703d2a30a1a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: whiteboard_corner_mat.001
-    second: {fileID: 2100000, guid: 3facdffaa43984a199f2e8ad3dbb4bf1, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: whiteboard_mat.001
-    second: {fileID: 2100000, guid: 1e60c110fdfa245aabb088466f750e65, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -271,8 +16,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -303,7 +46,7 @@ ModelImporter:
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
-    generateSecondaryUV: 0
+    generateSecondaryUV: 1
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 1
@@ -313,6 +56,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8

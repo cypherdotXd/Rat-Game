@@ -92,28 +92,21 @@ public class StateController : MonoBehaviour
 
     IEnumerator TryLanding()
     {
+        while (_rb.linearVelocity.y == 0f) yield return null;
         while (_isJumping)
         {
-            print($"jumping: {_isJumping}");
-            _isLanding = Physics.Raycast(_collider.bounds.center, -transform.up, out var landInfo, _collider.bounds.extents.y + 1.1f, ~_layerMask)
-                         && _isFalling;
-            if (_isLanding)
+            var isJumpingDone = (Physics.Raycast(_collider.bounds.center, -transform.up, out var landInfo, _collider.bounds.extents.y + 0.06f, ~_layerMask)
+                                && _rb.linearVelocity.y < -0.2f);
+            _animator.SetBool(isFalling_id, _isFalling);
+            if (isJumpingDone)
             {
                 Debug.DrawLine(_collider.bounds.center, landInfo.point, Color.green, 6);
-                print("land");
-                _animator.SetBool(isLanding_id, true);
                 _isJumping = false;
                 break;
             }
             yield return null;
         }
-        print("land complete");
-    }
-
-    public void OnLandAnimationEnd()
-    {
-        _animator.SetBool(isLanding_id, false);
-        _animator.SetBool(Jump_id, false);
+        _animator.SetTrigger("Land");
     }
 
     public void OnJumpAnimationEnd()
