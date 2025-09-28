@@ -5944,7 +5944,6 @@ GameObject:
   - component: {fileID: 667898931}
   - component: {fileID: 667898935}
   - component: {fileID: 667898934}
-  - component: {fileID: 667898936}
   - component: {fileID: 667898933}
   m_Layer: 0
   m_Name: CinemachineCamera
@@ -6004,7 +6003,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 667898930}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.00000001209823, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -1.422, y: 0.17140108, z: 1.8569999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6034,24 +6033,24 @@ MonoBehaviour:
       Input:
         InputAction: {fileID: 2948569627162100017, guid: 37ab81201aeae4accb89c6cdb75c55b3,
           type: 3}
-        Gain: 10
+        Gain: 1
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
-        AccelTime: 0
-        DecelTime: 0
+        AccelTime: 0.2
+        DecelTime: 0.2
     - Name: Look Y (Tilt)
       Owner: {fileID: 667898934}
       Enabled: 1
       Input:
         InputAction: {fileID: 2948569627162100017, guid: 37ab81201aeae4accb89c6cdb75c55b3,
           type: 3}
-        Gain: -10
+        Gain: -1
         CancelDeltaTime: 0
-      InputValue: -0
+      InputValue: 0
       Driver:
-        AccelTime: 0
-        DecelTime: 0
+        AccelTime: 0.2
+        DecelTime: 0.2
   PlayerIndex: -1
   AutoEnableInputs: 1
 --- !u!114 &667898934
@@ -6119,36 +6118,6 @@ MonoBehaviour:
     Time: 0
     Smoothing: 0
     IgnoreY: 0
---- !u!114 &667898936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 667898930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca7de3aefa901374ba29464584a3109a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineDecollider
-  CameraRadius: 0.3
-  Decollision:
-    Enabled: 1
-    ObstacleLayers:
-      serializedVersion: 2
-      m_Bits: 1
-    UseFollowTarget:
-      Enabled: 0
-      YOffset: 0
-    Damping: 0.5
-    SmoothingTime: 0
-  TerrainResolution:
-    Enabled: 0
-    TerrainLayers:
-      serializedVersion: 2
-      m_Bits: 1
-    MaximumRaycast: 10
-    Damping: 0.5
 --- !u!1 &692218653
 GameObject:
   m_ObjectHideFlags: 0
@@ -6381,11 +6350,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
-      objectReference: {fileID: 0}
-    - target: {fileID: -8015534294801062643, guid: fe8219bc5a67c4727a2972daa6774cee,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -2.253
       objectReference: {fileID: 0}
     - target: {fileID: -7640558969779515294, guid: fe8219bc5a67c4727a2972daa6774cee,
         type: 3}
@@ -7588,8 +7552,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1374613851}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.00000001209823, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.422, y: 0.17078419, z: 1.876896}
+  m_LocalRotation: {x: 0.000000005122023, y: 0.000000005122023, z: -2.6235118e-17,
+    w: 1}
+  m_LocalPosition: {x: -1.422, y: 0.17140108, z: 1.8569999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9105,20 +9070,20 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 6.3003664
-      outSlope: 6.3003664
+      inSlope: 0.676247
+      outSlope: 0.676247
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.0375
+      outWeight: 0.038043465
     - serializedVersion: 3
       time: 1.3
       value: 3
-      inSlope: 0.78492963
-      outSlope: 0.78492963
+      inSlope: 3.5164409
+      outSlope: 3.5164409
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.17499998
+      inWeight: 0.019022044
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -9163,7 +9128,6 @@ GameObject:
   - component: {fileID: 4924197226874279531}
   - component: {fileID: 8552046713937180488}
   - component: {fileID: 8552046713937180505}
-  - component: {fileID: 8552046713937180506}
   m_Layer: 6
   m_Name: Rat
   m_TagString: Player
@@ -9210,18 +9174,6 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 0
---- !u!114 &8552046713937180506
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8552046713937180503}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c75723ff42fac48c0ac0f55efe2bbc05, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraMotionCM
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

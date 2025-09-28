@@ -3,7 +3,252 @@ guid: fe8219bc5a67c4727a2972daa6774cee
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Book
+    second: {fileID: 2100000, guid: 177a8ea576068460faba0d4e5367c552, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bottle
+    second: {fileID: 2100000, guid: bd84ce22fa258422b913efe2d236ed88, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bottle Colour
+    second: {fileID: 2100000, guid: be33bd64bd39b4259b2abc3143f12b7c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bucket
+    second: {fileID: 2100000, guid: 84e4e4c00ae5d410eb0cdbc92ef0c2e1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bucket.001
+    second: {fileID: 2100000, guid: 182cb094be1374351827aff2bd4ccf91, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bucket.002
+    second: {fileID: 2100000, guid: c25deb2f49dd34eb8906359f50024597, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Drain.001
+    second: {fileID: 2100000, guid: 810814f4aa32849e6abe04d558a8c389, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Faucet_Handle
+    second: {fileID: 2100000, guid: f77806b11bacd4ebba63da23213ebc51, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Faucet_Metal
+    second: {fileID: 2100000, guid: 7ca484df69427469e8511299d6520761, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Faucet_Tape
+    second: {fileID: 2100000, guid: 95252f19354de4655bc1eeba5ee6294f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: FloorMat
+    second: {fileID: 2100000, guid: 595e7a0b4f63d4b95b718e2a53260e80, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Glass black
+    second: {fileID: 2100000, guid: bfec70805bca84dc79be197d555bc529, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: e5319b16a15e0453380707099ad4a598, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: 2516d9aea6ce0435c886424eb0fcda70, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: 02ca12445c986442fa9eb18c4a5b2c7e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.007
+    second: {fileID: 2100000, guid: 256ed643911eb4ec1a9a35f800292b90, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: PLastic black
+    second: {fileID: 2100000, guid: 6ad6f425e0c40488da356f1ec3be6f6d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: PhotoFrame
+    second: {fileID: 2100000, guid: bca668807b3f64b988b1c1e20986afd4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Soap.001
+    second: {fileID: 2100000, guid: bdcde57bba27b4e0ca6efecd8aab2fbb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Switch_Led
+    second: {fileID: 2100000, guid: f72b406b1b946436991f3aaccf2e79a0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Switch_White Plastic
+    second: {fileID: 2100000, guid: f14ea0ecf5a7a4be1b7ee4237b3352b0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Tapete material
+    second: {fileID: 2100000, guid: f2570732db7864db39a87949b1f8f176, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: WoodBoard
+    second: {fileID: 2100000, guid: edfd859fe875644b89a8c2e6b2a9ba77, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: almira_mat.002
+    second: {fileID: 2100000, guid: 1d84b025d02954b9d89935d89c921991, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bed_hinge_mat.002
+    second: {fileID: 2100000, guid: b87680c2d6b4e464f9144789ae9cdd59, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bed_wood_mat.002
+    second: {fileID: 2100000, guid: 147bcaa72bdf244899563e0f156b74d7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: box
+    second: {fileID: 2100000, guid: 8fccfc4dad19a48b2b4a8dbf1d8bc57c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ceilling
+    second: {fileID: 2100000, guid: 0cbdfe8b02a76489babed3c0955346d7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ceramic.002
+    second: {fileID: 2100000, guid: 8afaf623fae5d4883b352280e7776993, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: coffee_table_mat
+    second: {fileID: 2100000, guid: 51a423af22b204bdc9c07dfdbb04dcfc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fan_body_mat.001
+    second: {fileID: 2100000, guid: 29dc2597312b64587bb9477baaa911da, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: floor
+    second: {fileID: 2100000, guid: 36e5bcd2d91c043eea32a81f56deeeda, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hall_mat.001
+    second: {fileID: 2100000, guid: a926ec3a5b638485f8b4fef8fd3b0c57, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: laptop_mat.001
+    second: {fileID: 2100000, guid: 1e4ceb3280cc14d43a1b8fd24ae23b16, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mouse
+    second: {fileID: 2100000, guid: 85f483e7afd7a4ecbaa29418b147633e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pillow_1_mat.002
+    second: {fileID: 2100000, guid: 171f7067241a94e05a3f81494051fb2b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pipe02_mat
+    second: {fileID: 2100000, guid: 2a35f8a383d404ccfae5ac4b6fa689c8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pipe_mat
+    second: {fileID: 2100000, guid: e225d6b370b96409aa73bc9756cb1bfc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pipe_mat.001
+    second: {fileID: 2100000, guid: 1be413109f67e453ebe61be6bf8005db, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sock_2_mat.002
+    second: {fileID: 2100000, guid: b7643cb5cb6554c898a02472f2a321e9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sofa_mat
+    second: {fileID: 2100000, guid: 8d38b4be8528e4296b3e7822767608c5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: table_mat.002
+    second: {fileID: 2100000, guid: 70af552e5acb2459997cdbdb76fb8000, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tubelight_mat.001
+    second: {fileID: 2100000, guid: 1b3cfb78fe82b462981089dc961e547d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tv_cabinet_mat
+    second: {fileID: 2100000, guid: 836abc77ea18e477f997b5bcdaf6f5c8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tv_mat
+    second: {fileID: 2100000, guid: b5d301d32063c421b80e57e4b47c8598, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wallBlue
+    second: {fileID: 2100000, guid: 702b4a7fa6951420fbce55483358526b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: washing_machine_mat
+    second: {fileID: 2100000, guid: 95c69281c46f040399b5e2b87a5188ff, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: whiteboard_corner_mat.001
+    second: {fileID: 2100000, guid: 98c3583bde94b493081aca9ac063c4c0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: whiteboard_mat.001
+    second: {fileID: 2100000, guid: 3b2796163ac5749a493763130944226c, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
