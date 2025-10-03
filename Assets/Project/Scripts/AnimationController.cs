@@ -83,7 +83,6 @@ public class StateController : MonoBehaviour
     {
         _isJumping = true;
         _animator.SetTrigger(Jump_id);
-        print("jump");
         if(_jumpRoutine != null)
             StopCoroutine(_jumpRoutine);
         _jumpRoutine = StartCoroutine(TryLanding());
