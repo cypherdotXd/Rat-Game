@@ -8,15 +8,18 @@ public class StateController : MonoBehaviour
 {
     [SerializeField] private Animator _animator;
 	[SerializeField] private LayerMask _layerMask;
+	[SerializeField] private float _landTriggerDistance = 0.1f;
 
 	private readonly float CLIMB_TIMEOUT = 0.4f;
     private float _moveAnimState;
 
-    private bool _isJumping;
-    private bool _isFalling;
-    private bool _isLanding;
-    private bool _isClimbing;
-    private bool _isGrounded;
+    public bool _isJumping;
+    public bool _isFalling;
+    public bool _isLanding;
+    public bool _isClimbing;
+    public bool _isGrounded;
+    public bool _isGroundInReach;
+    private RaycastHit _landHitInfo;
     private Rigidbody _rb;
     private Collider _collider;
     private Coroutine _jumpRoutine;
@@ -52,20 +55,15 @@ public class StateController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // animation bools
-        _isFalling = !_isGrounded && _rb.linearVelocity.y < -0.1f;
-        _animator.SetBool(isFalling_id, _isFalling);
         // Raycasts
-        _isGrounded = Physics.Raycast(_collider.bounds.center, -transform.up, _collider.bounds.extents.y + 0.03f, ~_layerMask);
-        
+        _isGroundInReach = Physics.Raycast(_collider.bounds.center, -transform.up, out _landHitInfo,
+            _collider.bounds.extents.y + 1f, ~_layerMask);
+        _isGrounded = _isGroundInReach && _landHitInfo.distance < 0.035f;
+        // animation bools
+        _isFalling = !_isGrounded && _rb.linearVelocity.y < -0.05f;
+        _animator.SetBool(isFalling_id, _isFalling);
     }
-
-    private void Jump(InputAction.CallbackContext ctx)
-    {
-        if(!_isGrounded) return;
-        PlayJumpAnimation();
-    }
-
+    
     public void PlayWalkRunAnimation(float threshold = 1)
     {
         _animator.SetTrigger("MoveOnGround");
@@ -77,6 +75,12 @@ public class StateController : MonoBehaviour
     {
         _moveAnimState = threshold;
         _animator.SetFloat(moveState_id, _moveAnimState);
+    }
+
+    private void Jump(InputAction.CallbackContext ctx)
+    {
+        // if(!_isGrounded) return;
+        PlayJumpAnimation();
     }
 
     public bool PlayJumpAnimation()
@@ -94,23 +98,19 @@ public class StateController : MonoBehaviour
         while (_rb.linearVelocity.y == 0f) yield return null;
         while (_isJumping)
         {
-            var isJumpingDone = (Physics.Raycast(_collider.bounds.center, -transform.up, out var landInfo, _collider.bounds.extents.y + 0.06f, ~_layerMask)
-                                && _rb.linearVelocity.y < -0.2f);
-            _animator.SetBool(isFalling_id, _isFalling);
+            var isJumpingDone = _isGroundInReach && _landHitInfo.distance < _landTriggerDistance && _rb.linearVelocity.y < -0.2f;
+            // _animator.SetBool(isFalling_id, _isFalling);
             if (isJumpingDone)
             {
-                Debug.DrawLine(_collider.bounds.center, landInfo.point, Color.green, 6);
+                print($"Land: {_rb.linearVelocity.y}, d: {_landHitInfo.distance}");
+                Debug.DrawLine(_collider.bounds.center, _landHitInfo.point, Color.green, 6);
                 _isJumping = false;
                 break;
             }
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
+        print($"LAND");
         _animator.SetTrigger("Land");
     }
 
-    public void OnJumpAnimationEnd()
-    {
-
-
-    }
 }

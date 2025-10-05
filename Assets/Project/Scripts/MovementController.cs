@@ -28,14 +28,12 @@ public class MovementController: MonoBehaviour
 	[SerializeField] float turnAcceleration = 10f;
 
 	public bool isClimbing;
-	private bool _sprintToggle = false;
 	private bool _isGrounded;
 	private bool isWallInFront;
     private float currentForwardSpeed;
     private Vector3 _origin;
 	private Vector3 targetVelocity;
 	private Vector3 input;
-
 	private Rigidbody _rb;
 	private CapsuleCollider _collider;
 	private StateController _animationController;
@@ -124,7 +122,6 @@ public class MovementController: MonoBehaviour
 
 	IEnumerator JumpDelayed(float delay = 0.1f)
 	{
-		
 		yield return new WaitForSeconds(delay);
 		if (isClimbing)
 		{
@@ -143,7 +140,6 @@ public class MovementController: MonoBehaviour
 		while (_isGrounded || !isWallInFront)
 		    yield return new WaitForFixedUpdate();
 		var x = Vector3.Dot(_wallHitinfo.normal, -transform.forward);
-		print($"is wall {x}");
 		if(x < 0.5f)
 			yield break;
 		if(_climbCoroutine != null) StopCoroutine(_climbCoroutine);
@@ -154,7 +150,6 @@ public class MovementController: MonoBehaviour
 	{
 		isClimbing = true;
 		
-		print("climb start");
 		var normal = _wallHitinfo.normal;
 		var climbAngle = Vector3.SignedAngle(transform.forward, -normal, Vector3.up);
 		var forwardOnWall = Quaternion.AngleAxis(climbAngle, -normal) * Vector3.Cross(transform.right, normal);
@@ -171,7 +166,6 @@ public class MovementController: MonoBehaviour
 		        var diff = Vector3.Dot(_wallHitinfo.normal, normal);
 		        if (diff < 0.9f)
 		        {
-			        print("Wall changed");
 			        StartCoroutine(WallClimb(climbTimeout));
 			        yield break;
 		        }
@@ -193,7 +187,6 @@ public class MovementController: MonoBehaviour
 
 		StopClimbing();
         isClimbing = false;
-        print("climb end");
         _animationController.PlayWalkRunAnimation(1f);
     }
 
@@ -203,7 +196,6 @@ public class MovementController: MonoBehaviour
 			StopCoroutine(_climbCoroutine);
 		_rb.linearVelocity = 0.5f * _rb.linearVelocity.magnitude * transform.forward;
 		
-		print("Stop");
 		cameraMotion.EndLookFollow();
 		isClimbing = false;
 		StandOnGround();
