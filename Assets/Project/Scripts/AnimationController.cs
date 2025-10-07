@@ -98,11 +98,10 @@ public class StateController : MonoBehaviour
         while (_rb.linearVelocity.y == 0f) yield return null;
         while (_isJumping)
         {
-            var isJumpingDone = _isGroundInReach && _landHitInfo.distance < _landTriggerDistance && _rb.linearVelocity.y < -0.2f;
-            // _animator.SetBool(isFalling_id, _isFalling);
+            var isJumpingDone = _isGroundInReach && _landHitInfo.distance < _landTriggerDistance && _rb.linearVelocity.y < -0.0001f;
             if (isJumpingDone)
             {
-                print($"Land: {_rb.linearVelocity.y}, d: {_landHitInfo.distance}");
+                // print($"Land: {_rb.linearVelocity.y}, d: {_landHitInfo.distance}");
                 Debug.DrawLine(_collider.bounds.center, _landHitInfo.point, Color.green, 6);
                 _isJumping = false;
                 break;

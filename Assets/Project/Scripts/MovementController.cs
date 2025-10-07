@@ -65,7 +65,7 @@ public class MovementController: MonoBehaviour
     private void Update()
 	{
         input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-		WalkAndRun(input);
+        MoveWithSpeed(walkSpeed, input, acceleration);
 	}
 
 	private void FixedUpdate()
@@ -77,11 +77,6 @@ public class MovementController: MonoBehaviour
         
         _origin = _collider.bounds.center - _collider.bounds.extents.y * Vector3.up;
     }
-
-    private void WalkAndRun(Vector2 dirInput)
-	{
-		MoveWithSpeed(walkSpeed, dirInput, acceleration);
-	}
 
     private void MoveWithSpeed(float speed, Vector2 dirInput, float acceleration)
 	{
@@ -98,7 +93,9 @@ public class MovementController: MonoBehaviour
 			targetVelocity.y = _rb.linearVelocity.y;
 			_rb.linearVelocity = targetVelocity;
 		}
-		var animState = _inputStateCurve.Evaluate(dirInput.sqrMagnitude);
+
+		var h = _rb.linearVelocity.magnitude / (speed * speedMultiplier * _inputSpeedCurve.Evaluate(1));
+		var animState = _inputStateCurve.Evaluate(h);
         _animationController.ChangeMoveState(animState);
 
 		// Rotate towards camera forward direction when moving
