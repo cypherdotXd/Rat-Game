@@ -40,7 +40,7 @@ public class MovementController: MonoBehaviour
 	private RaycastHit _groundHitInfo;
 	private static RaycastHit _wallHitinfo;
 	private Coroutine _climbCoroutine;
-
+	
 	private void OnEnable()
 	{
         TouchInputManager.InputMain.jump.performed += DoJump;
@@ -149,7 +149,10 @@ public class MovementController: MonoBehaviour
 		
 		var normal = _wallHitinfo.normal;
 		var climbAngle = Vector3.SignedAngle(transform.forward, -normal, Vector3.up);
-		var forwardOnWall = Quaternion.AngleAxis(climbAngle, -normal) * Vector3.Cross(transform.right, normal);
+		var lateralDirection = Quaternion.AngleAxis(climbAngle, -normal) * Vector3.Cross(transform.right, normal);
+		
+
+		Debug.DrawRay(_wallHitinfo.point, transform.forward, Color.red, 6);
 		var wallDir = (transform.position - _wallHitinfo.point).normalized;
         _animationController.PlayWalkRunAnimation(1.5f);
 		
@@ -170,13 +173,15 @@ public class MovementController: MonoBehaviour
 			timer += Time.fixedDeltaTime;
 			
 			isWall = Physics.Raycast(_origin, -wallDir, _collider.bounds.extents.z + 0.1f, ~_layerMask);
-			forwardOnWall = Quaternion.AngleAxis(Mathf.Atan2(input.x, input.y) * 0.08f * Mathf.Rad2Deg, transform.up) * forwardOnWall;
-			var targetRotation = Quaternion.LookRotation(forwardOnWall, normal);
+			
+			lateralDirection = Quaternion.AngleAxis(Mathf.Atan2(input.x, input.y) * 0.08f * Mathf.Rad2Deg, transform.up) * lateralDirection;
+			var targetRotation = Quaternion.LookRotation(lateralDirection, normal);
 			transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 15f * Time.deltaTime);
 			
 			// Move Upward
-			var climbDir = (Vector3.Dot(transform.forward, Vector3.up) + 1f)/2f;
-			climbDir = Mathf.Clamp(climbDir, 0.6f, 1f);
+			var climbDir = (-Vector3.Dot(Vector3.up, transform.forward) + 1f)/2f;
+			print(climbDir);
+			climbDir = Mathf.Clamp(climbDir, 0.8f, 1f);
 			_rb.linearVelocity = climbForce * climbDir * transform.forward;
 			
 			yield return new WaitForFixedUpdate();
@@ -206,50 +211,6 @@ public class MovementController: MonoBehaviour
 		var r = Quaternion.LookRotation(forward.normalized, isGround ? groundInfo.normal : Vector3.up);
 		transform.DORotateQuaternion(r, 0.2f);
 	}
-
-	private IEnumerator WallClimb1(float time)
-	{
-		float timer = 0;
-		
-		// Rotate mesh(not this rb) parallel to surface
-		Vector3 normal = _wallHitinfo.normal;
-		float angle = Vector3.SignedAngle(transform.up, normal, transform.right);
-		Vector3 lastRot = mesh.localEulerAngles;
-		// mesh.DOLocalRotate(angle * Vector3.right, 0.2f);
-		// mesh.DOLocalMoveZ(0.08f, 0.2f);
-		print("climb start");
-		isClimbing = true;
-		Vector3 forward = Quaternion.AngleAxis(angle, transform.right) * transform.forward;
-		// Vector3 forward = Vector3.Cross(normal, transform.right).normalized;
-		Debug.DrawRay(_collider.bounds.center, forward * 0.2f, Color.green, 10);
-		transform.DORotateQuaternion(Quaternion.LookRotation(forward), 0.1f);
-
-        _animationController.PlayWalkRunAnimation(1.5f);
-        while (timer < time && isWallInFront)
-		{
-			timer += Time.deltaTime;
-			if (_isGrounded)
-				break;
-			// Move Upward
-			_rb.linearVelocity = climbForce * Mathf.Sqrt(maxJumpHeight * 2f * 8f) * Vector3.up;
-			yield return null;
-
-		}
-		if(time <= timer)
-			_rb.AddForce((-transform.forward + transform.up).normalized * 2, ForceMode.Impulse);
-		else
-			_rb.AddForce((transform.forward + transform.up).normalized * 1, ForceMode.Impulse);
-		var right = transform.right;
-		right.y = 0;
-		forward = Vector3.Cross(_isGrounded ? _groundHitInfo.normal : Vector3.up, right).normalized;
-		transform.DORotateQuaternion(Quaternion.LookRotation(-forward), 0.1f);
-		
-        isClimbing = false;
-        print("climb end");
-        mesh.DOLocalRotate(lastRot, 0.3f);
-        mesh.DOLocalMoveZ(0f, 0.2f);
-        _animationController.PlayWalkRunAnimation(1f);
-
-    }
+	
 
 }
