@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
@@ -30,8 +31,8 @@ public class TouchInputManager : MonoBehaviour
 
     private void OnEnable()
     {
-        EnhancedTouchSupport.Enable();
         InputMain.Enable();
+        EnhancedTouchSupport.Enable();
     }
 
     private void OnDisable()

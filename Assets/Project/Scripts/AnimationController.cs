@@ -31,12 +31,12 @@ public class StateController : MonoBehaviour
 
     private void OnEnable()
     {
-        TouchInputManager.InputMain.jump.performed += Jump;
+        InputSystem.actions.FindAction("jump").performed += Jump;
     }
 
     private void OnDisable()
     {
-        TouchInputManager.InputMain.jump.performed -= Jump;
+        InputSystem.actions.FindAction("jump").performed -= Jump;
     }
 
     // Start is called before the first frame update

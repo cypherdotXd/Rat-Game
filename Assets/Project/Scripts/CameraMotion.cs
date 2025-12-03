@@ -85,8 +85,7 @@ public class CameraMotion : MonoBehaviour
 
         if (_doLookFollow)
         {   
-            transform.rotation = Quaternion.Slerp(transform.rotation, 
-                Quaternion.LookRotation(_followTarget.forward, _followTarget.up), 8 * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation((_followTarget.forward - 0.5f * _followTarget.up).normalized, _followTarget.up), 8 * Time.deltaTime);
         }
         else
         {

@@ -9,10 +9,10 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private Transform objectThrowPoint;
     [SerializeField] private float height = 1;
     [SerializeField] private GameObject[] throwables = new GameObject[5];
-    [SerializeField] private Animator faceAnimator;
+    [SerializeField] private Animator animator;
+    // [SerializeField] private Animator faceAnimator;
 
     NavMeshAgent navAgent;
-    private Animator animator;
     private Vector3 random = Vector3.zero;
     private int moveAnimthresholdId;
     private int triggerJumpId;
@@ -20,6 +20,7 @@ public class EnemyAI : MonoBehaviour
 
     private void OnEnable()
     {
+        // animator.
 
     }
 
@@ -29,13 +30,9 @@ public class EnemyAI : MonoBehaviour
         moveAnimthresholdId = Animator.StringToHash("SpeedThreshold");
         triggerJumpId = Animator.StringToHash("TriggerJump");
         triggerThrowId = Animator.StringToHash("TriggerThrow");
-        throwables[0].transform.position = transform.position + 2f * transform.forward + Vector3.up;
-        foreach(GameObject throwable in throwables)
-        {
-            throwable.GetComponent<Rigidbody>().useGravity = false;
-        }
-        animator = GetComponent<Animator>();
+        
         navAgent = GetComponent<NavMeshAgent>();
+        // ThrowObjectAtTarget(throwables[0].GetComponent<Rigidbody>(), player.position, 1f);
     }
 
     float timer = 0f;
@@ -43,22 +40,26 @@ public class EnemyAI : MonoBehaviour
     void Update()
     {
         //animator.SetFloat(moveAnimthresholdId, navAgent.velocity.magnitude, 0.1f, Time.deltaTime);
-        animator.SetFloat(moveAnimthresholdId, navAgent.velocity.magnitude);
-        timer += Time.deltaTime;
-        if(timer > 3f)
-        {
-            navAgent.SetDestination(player.position);
-            int i = Random.Range(0, throwables.GetLength(0));
-            GameObject thing = Instantiate(throwables[i], objectThrowPoint.position, Quaternion.identity);
-            ThrowObjectAtTarget(thing.GetComponent<Rigidbody>(), player.position, height);
-            animator.SetBool(triggerThrowId, true);
-            //navAgent.destination = player.position;
-            timer = 0f;
-        }
+        // animator.SetFloat(moveAnimthresholdId, navAgent.velocity.magnitude);
+        // timer += Time.deltaTime;
+        // if (!(timer > 3f)) return;
+        // navAgent.SetDestination(player.position);
+        // timer = 0f;
     }
 
-    void ThrowObjectAtTarget(Rigidbody thing, Vector3 targetPosition, float h)
+    [ContextMenu("Throw")]
+    public void Throw()
     {
+        var throwable = throwables[0];
+        var thing = Instantiate(throwable, objectThrowPoint.position, objectThrowPoint.rotation).GetComponent<Rigidbody>();
+        thing.gameObject.SetActive(true);
+        ThrowObjectAtTarget(thing, player.position, height);
+    }
+    
+    private void ThrowObjectAtTarget(Rigidbody thing, Vector3 targetPosition, float h)
+    {
+        thing.isKinematic = false;
+        thing.position = objectThrowPoint.position;
         float g = Physics.gravity.y;
 
         float Sx = targetPosition.x - thing.transform.position.x;
