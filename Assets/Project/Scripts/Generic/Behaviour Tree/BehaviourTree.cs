@@ -7,22 +7,44 @@ namespace Behaviour
     public enum Status {Success, Failed, Running}
     
     [CreateAssetMenu(fileName = "NewNode", menuName = "Nodes/Node")]
-    public class Node : ScriptableObject
+    public class Node
     {
-        public string nodeName;
-        public List<Node> Children = new();
-    
-        public Node(string name)
+        protected readonly string nodeName;
+        protected readonly List<Node> Children = new();
+
+        protected Node(string name)
         {
-            this.name = name;
+            nodeName = name;
         }
+
+        public Node AddChild(Node node)
+        {
+            Children.Add(node);
+            return this;
+        }
+        
         public virtual Status Run() => Status.Success;
     }
 
-    [CreateAssetMenu(fileName = "NewSequenceNode", menuName = "Nodes/Sequence Node")]
+    public class BehaviourTree : Node
+    {
+        public BehaviourTree(string name) : base(name)
+        {
+        }
+
+        public override Status Run()
+        {
+            foreach (var child in Children)
+            {
+                var status = child.Run();
+                if (status != Status.Success) return status;
+            }
+            return Status.Success;
+        }
+    }
+
     public class SequenceNode : Node
     {
-        
         public SequenceNode(string name) : base(name)
         {
         }
@@ -72,5 +94,21 @@ namespace Behaviour
         }
     }
     
-    public class MoveTo
+    public class LeafNode : Node
+    {
+        private IStrategy strategy;
+        
+        public LeafNode(string name, IStrategy strategy) : base(name)
+        {
+            this.strategy = strategy;
+        }
+
+        public override Status Run()
+        {
+            var result = strategy.Run();
+            Debug.Log($"Node {nodeName}, result {result}");
+            return result;
+        } 
+    }
+    
 }

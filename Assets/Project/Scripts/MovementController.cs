@@ -98,7 +98,7 @@ public class MovementController: MonoBehaviour
 	{
         var canMove = dirInput.sqrMagnitude != 0;
 
-	    print(isClimbingPath);
+	    // print(isClimbingPath);
         if (isClimbingPath)
         {
 	        print("climbing Start");
