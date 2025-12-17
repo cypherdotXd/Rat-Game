@@ -33,7 +33,7 @@ public class FollowAi : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var s = bt.Run();
+        // var s = bt.Run();
         // print(s);
         // UpdateNavDestination();
     }

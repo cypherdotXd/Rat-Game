@@ -1,26 +1,27 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using DG.Tweening;
+using MIRA;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
-using UnityEngine.Splines;
 
-
-public class MovementController: MonoBehaviour
+public class MovementController : StateMachineBehaviour<MovementController>
 {
 	[Header("References")]
 	[SerializeField] private Transform mesh;
-	[SerializeField] private Transform cameraRig;
 	[SerializeField] private CameraMotion cameraMotion;
 
 	[Space(10)]
 
 	[SerializeField] private LayerMask _layerMask;
-	[SerializeField] private AnimationCurve _inputSpeedCurve;
+	public AnimationCurve inputSpeedCurve;
 	[SerializeField] private AnimationCurve _inputStateCurve;
-    [SerializeField] float walkSpeed = 0.7f;
-	[SerializeField] float acceleration = 4f;
+	public Transform cameraRig;
+    public float walkSpeed = 0.7f;
+	public float acceleration = 4f;
+	public Rigidbody rb;
 	[SerializeField] float speedMultiplier = 1f;
 	[SerializeField] float maxJumpHeight = 0.4f;
 	[SerializeField] float jumpForce = 0.4f;
@@ -28,6 +29,7 @@ public class MovementController: MonoBehaviour
 	[SerializeField] float climbForce = 0.6f;
 	[SerializeField] float turnAcceleration = 10f;
 
+	public StateController animationController;
 	public bool isClimbingWall;
 	public bool isClimbingPath;
 	private bool _isGrounded;
@@ -37,24 +39,28 @@ public class MovementController: MonoBehaviour
 	private Vector3 targetVelocity;
 	private Vector3 input;
 	private PathClimb _pathClimb;
-	private Rigidbody _rb;
 	private CapsuleCollider _collider;
-	private StateController _animationController;
 	private RaycastHit _groundHitInfo;
-	private static RaycastHit _wallHitinfo;
+	private RaycastHit _wallHitinfo;
 	private Coroutine _climbCoroutine;
 
 	private void Awake()
 	{
 		Application.targetFrameRate = 60;
 		_collider = GetComponent<CapsuleCollider>();
-		_rb = GetComponent<Rigidbody>();
-		_animationController = GetComponent<StateController>();
+		// rb = GetComponent<Rigidbody>();
+		animationController = GetComponent<StateController>();
 	}
 
 	private void OnEnable()
 	{
         InputSystem.actions.FindAction("jump").performed += DoJump;
+        // CurrentState.OnUpdateState += (state) =>
+        // {
+	       //  // var h = _rb.linearVelocity.magnitude / (speed * speedMultiplier * curve.Evaluate(1));
+	       //  var h = MoveContextData.Direction.magnitude;
+	       //  animationController.ChangeMoveState(h);
+        // };
 	}
 
 	private void OnDisable()
@@ -65,15 +71,17 @@ public class MovementController: MonoBehaviour
 	// Start is called once only 
 	private void Start()
 	{
-		
+		// State : IDLE, WALK, SPRINT, WALL CLIMB
+		var idleState = new IdleState(this);
+		var moveState = new MoveState(this);
+		SwitchState(moveState);
 	}
 
     // Update is called once per frame
     private void Update()
     {
-        input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-        
-        MoveWithSpeed(walkSpeed, input, acceleration);
+        // MoveWithSpeed(walkSpeed, input, acceleration);
+        UpdateState();
 	}
 
 	private void FixedUpdate()
@@ -82,16 +90,23 @@ public class MovementController: MonoBehaviour
 	        _collider.bounds.extents.y + 0.01f, ~_layerMask);
         isWallInFront = Physics.Raycast(_collider.bounds.center - 0.5f * _collider.bounds.extents.y * Vector3.up,
 	        transform.forward, out _wallHitinfo, _collider.bounds.extents.z + 0.05f, ~_layerMask, QueryTriggerInteraction.Collide);
-
         
         _origin = _collider.bounds.center - _collider.bounds.extents.y * Vector3.up;
     }
 
-	public void ClimbPath(PathClimb pathClimb)
+	public void NotifyClimbPathBegin(PathClimb pathClimb)
 	{
 		print("Climb");
 		_pathClimb = pathClimb;
 		isClimbingPath = true;
+	}
+
+	public void ClimbPath()
+	{
+		print("climbing Start");
+		isClimbingPath = _pathClimb.ClimbIncrementally(transform, 0.1f * Time.deltaTime * input.y);
+		rb.isKinematic = isClimbingPath;
+		animationController.ChangeMoveState(input.y);
 	}
 
     private void MoveWithSpeed(float speed, Vector2 dirInput, float acceleration)
@@ -101,28 +116,25 @@ public class MovementController: MonoBehaviour
 	    // print(isClimbingPath);
         if (isClimbingPath)
         {
-	        print("climbing Start");
-	        isClimbingPath = _pathClimb.ClimbIncrementally(transform, 0.1f * Time.deltaTime * input.y);
-	        _rb.isKinematic = isClimbingPath;
-	        _animationController.ChangeMoveState(input.y);
+	        ClimbPath();
 	        return;
         }
         
 		if (isClimbingWall)
 			return;
 		
-		var targetSpeed = _inputSpeedCurve.Evaluate(dirInput.sqrMagnitude) * speed;
+		var targetSpeed = inputSpeedCurve.Evaluate(dirInput.sqrMagnitude) * speed;
 		currentForwardSpeed = Mathf.Lerp(currentForwardSpeed, targetSpeed, acceleration * Time.deltaTime);
 		if (canMove) {
 			//isMoving = true;
 			targetVelocity = speedMultiplier * currentForwardSpeed * transform.forward;
-			targetVelocity.y = _rb.linearVelocity.y;
-			_rb.linearVelocity = targetVelocity;
+			targetVelocity.y = rb.linearVelocity.y;
+			rb.linearVelocity = targetVelocity;
 		}
 
-		var h = _rb.linearVelocity.magnitude / (speed * speedMultiplier * _inputSpeedCurve.Evaluate(1));
+		var h = rb.linearVelocity.magnitude / (speed * speedMultiplier * inputSpeedCurve.Evaluate(1));
 		var animState = _inputStateCurve.Evaluate(h);
-        _animationController.ChangeMoveState(animState);
+        animationController.ChangeMoveState(animState);
 
 		// Rotate towards camera forward direction when moving
 		if (dirInput.sqrMagnitude == 0) return;
@@ -133,7 +145,7 @@ public class MovementController: MonoBehaviour
 		var yAngle = Vector2.SignedAngle(dirInput, Vector2.up);
 		targetRotation *= Quaternion.Euler(0, yAngle, 0);
 
-		_rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, turnAcceleration * Time.deltaTime));
+		rb.MoveRotation(Quaternion.Slerp(transform.rotation, targetRotation, turnAcceleration * Time.deltaTime));
 	}
 
     private void DoJump(InputAction.CallbackContext _)
@@ -149,12 +161,12 @@ public class MovementController: MonoBehaviour
 		if (isClimbingWall)
 		{
 			StopClimbing();
-			_rb.AddForce(0.6f * transform.up, ForceMode.Impulse);
+			rb.AddForce(0.6f * transform.up, ForceMode.Impulse);
 			yield break;
 		}
 		
 		var jumpDir = _isGrounded ? _groundHitInfo.normal : Vector3.up;
-		_rb.AddForce(jumpForce * jumpDir, ForceMode.Impulse);
+		rb.AddForce(jumpForce * jumpDir, ForceMode.Impulse);
 		StartCoroutine(TryWallClimb(0.6f));
     }
 
@@ -184,7 +196,7 @@ public class MovementController: MonoBehaviour
 		
 		Debug.DrawRay(_wallHitinfo.point, transform.forward, Color.red, 6);
 		var wallDir = (transform.position - _wallHitinfo.point).normalized;
-        _animationController.PlayWalkRunAnimation(1.5f);
+        animationController.PlayWalkRunAnimation(1.5f);
 		
 		var isWall = true;
 		float timer = 0;
@@ -211,14 +223,14 @@ public class MovementController: MonoBehaviour
 			// Move Upward
 			var climbDir = (-Vector3.Dot(Vector3.up, transform.forward) + 1f)/2f;
 			climbDir = Mathf.Clamp(climbDir, 0.8f, 1f);
-			_rb.linearVelocity = climbForce * climbDir * transform.forward;
+			rb.linearVelocity = climbForce * climbDir * transform.forward;
 			
 			yield return new WaitForFixedUpdate();
 		}
 
 		StopClimbing();
         isClimbingWall = false;
-        _animationController.PlayWalkRunAnimation(1f);
+        animationController.PlayWalkRunAnimation(1f);
     }
 
 	private void StopClimbing()
@@ -226,12 +238,12 @@ public class MovementController: MonoBehaviour
 		if(_climbCoroutine != null)
 			StopCoroutine(_climbCoroutine);
 		
-		_rb.isKinematic = false;
+		rb.isKinematic = false;
 		cameraMotion.EndLookFollow();
 		isClimbingWall = false;
 		var forward = cameraRig.forward;
 		forward.y = 0;
-		_rb.linearVelocity = 0.5f * _rb.linearVelocity.magnitude * transform.forward;
+		rb.linearVelocity = 0.5f * rb.linearVelocity.magnitude * transform.forward;
 		StandOnGround(forward);
 	}
 
@@ -243,7 +255,130 @@ public class MovementController: MonoBehaviour
 		var r = Quaternion.LookRotation(forward.normalized, isGround ? groundInfo.normal : Vector3.up);
 		transform.DORotateQuaternion(r, 0.2f);
 	}
-	
+}
+
+[Serializable]
+public struct SurroundContextData
+{
+	public RaycastHit GroundHitInfo;
+	public RaycastHit WallHitInfo;
+} 
+
+public class MoveState : StateBase<MovementController>
+{
+	private float _speedMultiplier = 1f;
+	private float _currentForwardSpeed;
+	private Vector3 _targetVelocity;
+	private MovementController _context;
 	
 
+	public MoveState(MovementController stateMachine) : base(stateMachine)
+	{
+		_context = stateMachine;
+	}
+
+	public override void EnterState()
+	{
+		_context.rb.isKinematic = false;
+		Debug.Log("Entering MoveState");
+	}
+
+	public override void UpdateState()
+	{
+		var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
+		var targetSpeed = _context.inputSpeedCurve.Evaluate(input.sqrMagnitude) * _context.walkSpeed;
+		var lookDirection = _context.cameraRig.forward;
+		
+		if(input.sqrMagnitude < 0.01f)
+			_context.SwitchState(new IdleState(_context));
+		
+		_currentForwardSpeed = Mathf.Lerp(_currentForwardSpeed, targetSpeed, _context.acceleration * Time.deltaTime);
+		_targetVelocity = _speedMultiplier * _currentForwardSpeed * _context.rb.transform.forward;
+		_targetVelocity.y = _context.rb.linearVelocity.y;
+		_context.rb.linearVelocity = _targetVelocity;
+		// Debug.Log(_targetVelocity);
+		
+		// Rotate towards camera forward direction when moving
+		
+		var direction = lookDirection;
+		direction.y = 0;
+		var targetRotation = Quaternion.LookRotation(direction);
+		var yAngle = Vector2.SignedAngle(input, Vector2.up);
+		targetRotation *= Quaternion.Euler(0, yAngle, 0);
+
+		_context.rb.MoveRotation(Quaternion.Slerp(_context.rb.transform.rotation, targetRotation, 10 * Time.deltaTime));
+		
+	}
+
+	public override void FixedUpdateState()
+	{
+		
+	}
+
+	public override void ExitState()
+	{
+		
+	}
+}
+
+public class WallClimbState : StateBase<MovementController>
+{
+	public WallClimbState(MovementController context) : base(context)
+	{
+	}
+
+	public override void EnterState()
+	{
+		throw new NotImplementedException();
+	}
+
+	public override void UpdateState()
+	{
+		throw new NotImplementedException();
+	}
+
+	public override void FixedUpdateState()
+	{
+		throw new NotImplementedException();
+	}
+
+	public override void ExitState()
+	{
+		throw new NotImplementedException();
+	}
+}
+
+public class IdleState : StateBase<MovementController>
+{
+	private float _currentForwardSpeed;
+	private MovementController _context;
+	
+	public IdleState(MovementController stateMachine) : base(stateMachine)
+	{
+		_context = stateMachine;
+	}
+
+	public override void EnterState()
+	{
+		Debug.Log("Entering IdleState");
+	}
+
+	public override void UpdateState()
+	{
+		var rb = _context.rb;
+		// rb.linearVelocity = Vector3.zero;
+		var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
+
+		if(input.sqrMagnitude > 0.01f)
+			_context.SwitchState(new MoveState(_context));
+	}
+
+	public override void FixedUpdateState()
+	{
+		
+	}
+
+	public override void ExitState()
+	{
+	}
 }

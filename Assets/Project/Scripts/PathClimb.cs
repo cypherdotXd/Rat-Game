@@ -40,7 +40,7 @@ public class PathClimb : MonoBehaviour
         pathClimbed = 0.01f;
         var isPlayer = interactor.TryGetComponent(out MovementController movement);
         if(isPlayer)
-            movement.ClimbPath(this);
+            movement.NotifyClimbPathBegin(this);
     }
 
     public bool ClimbIncrementally(Transform target, float increment, float startClimb = -1f)
