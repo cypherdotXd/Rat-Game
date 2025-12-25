@@ -3,18 +3,23 @@ guid: f69184fe0eef648ea9b5dd570f799e3f
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: rat_mat.001
+    second: {fileID: 2100000, guid: 7d993638111e647e09d988df37142390, type: 2}
   materials:
     materialImportMode: 2
-    materialName: 1
-    materialSearch: 2
-    materialLocation: 0
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
-    removeConstantScaleCurves: 0
+    removeConstantScaleCurves: 1
     motionNodeName: 
     animationImportErrors: 
     animationImportWarnings: 
@@ -31,38 +36,9 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: sneak_run_anim
-      takeName: sneak_run_anim
-      internalID: -4214337993172697565
-      firstFrame: 0
-      lastFrame: 9
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Rat Armature|falling_anim
-      takeName: Rat Armature|falling_anim
-      internalID: -8943638591865721466
+      name: falling_anim
+      takeName: falling_anim
+      internalID: 0
       firstFrame: 0
       lastFrame: 20
       wrapMode: 0
@@ -89,40 +65,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Rat Armature|idle_anim
-      takeName: Rat Armature|idle_anim
-      internalID: -657365742943726788
+      name: land_anim
+      takeName: land_anim
+      internalID: 0
       firstFrame: 0
-      lastFrame: 598
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Rat Armature|jump_up_anim
-      takeName: Rat Armature|jump_up_anim
-      internalID: 8368883236338540117
-      firstFrame: 0
-      lastFrame: 30
+      lastFrame: 8
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -147,69 +94,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Rat Armature|jump_up_anim.001
-      takeName: Rat Armature|jump_up_anim.001
-      internalID: -1061906677297963247
+      name: walk_backward_anim
+      takeName: walk_backward_anim
+      internalID: 0
       firstFrame: 0
-      lastFrame: 0
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Rat Armature|land_anim
-      takeName: Rat Armature|land_anim
-      internalID: 8828097293895230279
-      firstFrame: 0
-      lastFrame: 12
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Rat Armature|run_anim
-      takeName: Rat Armature|run_anim
-      internalID: -2183983235792142202
-      firstFrame: 0
-      lastFrame: 5
+      lastFrame: 19
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -234,11 +123,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Rat Armature|sitting
-      takeName: Rat Armature|sitting
-      internalID: 4676777027151093881
+      name: walk_forward_anim
+      takeName: walk_forward_anim
+      internalID: 0
       firstFrame: 0
-      lastFrame: 100
+      lastFrame: 19
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -263,9 +152,38 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Rat Armature|sneak_run_anim
-      takeName: Rat Armature|sneak_run_anim
-      internalID: 2079811097520134575
+      name: jump_up_anim
+      takeName: jump_up_anim
+      internalID: 0
+      firstFrame: 4.9
+      lastFrame: 18
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: sneak_run_anim
+      takeName: sneak_run_anim
+      internalID: 0
       firstFrame: 0
       lastFrame: 9
       wrapMode: 0
@@ -292,40 +210,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Rat Armature|walk_backward_anim
-      takeName: Rat Armature|walk_backward_anim
-      internalID: 8458170975506631198
+      name: idle_anim
+      takeName: idle_anim
+      internalID: 0
       firstFrame: 0
-      lastFrame: 19
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: Rat Armature|walk_forward_anim
-      takeName: Rat Armature|walk_forward_anim
-      internalID: 8464336736699399346
-      firstFrame: 0
-      lastFrame: 19
+      lastFrame: 598
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -353,7 +242,7 @@ ModelImporter:
   meshes:
     lODScreenPercentages: []
     globalScale: 1
-    meshCompression: 0
+    meshCompression: 2
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
@@ -421,8 +310,8 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
-  importBlendShapeDeformPercent: 1
-  remapMaterialsIfMaterialImportModeIsNone: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

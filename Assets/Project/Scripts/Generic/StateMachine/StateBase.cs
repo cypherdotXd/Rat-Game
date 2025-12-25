@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -16,9 +17,27 @@ namespace MIRA
             CurrentState?.EnterState();
         }
     
-        public void SwitchState(StateBase<T> newState)
+        public void SwitchState(StateBase<T> newState, float delayTime = -1)
         {
             if (newState == null) return;
+            if (delayTime > 0)
+            {
+                StartCoroutine(SwitchStateRoutine(newState, delayTime));
+            }
+            else
+            {
+                // Debug.Log("Switching to " + newState.GetType().Name);
+                LastState = CurrentState;
+                CurrentState?.ExitState();
+                CurrentState = newState;
+                CurrentState.EnterState();
+            }
+        }
+
+        public IEnumerator SwitchStateRoutine(StateBase<T> newState, float delayTime)
+        {
+            if (newState == null) yield break;
+            yield return new WaitForSeconds(delayTime);
             
             // Debug.Log("Switching to " + newState.GetType().Name);
             LastState = CurrentState;

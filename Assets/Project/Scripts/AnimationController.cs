@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,8 +13,8 @@ public class StateController : MonoBehaviour
 	[SerializeField] private LayerMask _layerMask;
 	[SerializeField] private float _landTriggerDistance = 0.1f;
 
-	private readonly float CLIMB_TIMEOUT = 0.4f;
     private float _moveAnimState;
+    private TweenerCore<float, float, FloatOptions> _moveThresholdTween;
 
     public bool _isJumping;
     public bool _isFalling;
@@ -61,14 +64,25 @@ public class StateController : MonoBehaviour
         _isGrounded = _isGroundInReach && _landHitInfo.distance < 0.035f;
         // animation bools
         _isFalling = !_isGrounded && _rb.linearVelocity.y < -0.05f;
-        _animator.SetBool(isFalling_id, _isFalling);
+        // _animator.SetBool(isFalling_id, _isFalling);
     }
     
-    public void PlayWalkRunAnimation(float threshold = 1)
+    public void PlayWalkRunAnimation(float? threshold = null, float transitionTime = 0)
     {
+        _animator.SetBool("is_moving", true);
         _animator.SetTrigger("MoveOnGround");
-        _moveAnimState = threshold;
-        _animator.SetFloat(moveState_id, _moveAnimState);
+        var targetValue = threshold ?? _moveAnimState;
+        _moveThresholdTween?.Kill();
+        if (transitionTime == 0)
+        {
+            _moveAnimState = targetValue;
+            _animator.SetFloat(moveState_id, targetValue);
+        }
+        else
+        {
+            _moveThresholdTween = DOTween.To(() => _moveAnimState, x => _moveAnimState = x, targetValue, transitionTime);
+            _moveThresholdTween.OnUpdate(() => _animator.SetFloat(moveState_id, _moveAnimState, _moveAnimState, Time.deltaTime));
+        }
     }
 
     public void ChangeMoveState(float threshold)
@@ -80,16 +94,17 @@ public class StateController : MonoBehaviour
     private void Jump(InputAction.CallbackContext ctx)
     {
         // if(!_isGrounded) return;
-        PlayJumpAnimation();
+        // PlayJumpAnimation();
     }
 
     public bool PlayJumpAnimation()
     {
         _isJumping = true;
+        _animator.SetBool("is_moving", false);
         _animator.SetTrigger(Jump_id);
-        if(_jumpRoutine != null)
-            StopCoroutine(_jumpRoutine);
-        _jumpRoutine = StartCoroutine(TryLanding());
+        // if(_jumpRoutine != null)
+        //     StopCoroutine(_jumpRoutine);
+        // _jumpRoutine = StartCoroutine(TryLanding());
         return _isGrounded;
     }
 
@@ -110,6 +125,18 @@ public class StateController : MonoBehaviour
         }
         print($"LAND");
         _animator.SetTrigger("Land");
+    }
+
+    public void PlayLandingAnimation()
+    {
+        _animator.SetTrigger("Land");
+        _animator.SetBool("is_moving", false);
+    }
+    
+    public void PlayFallingAnimation(bool isFalling)
+    {
+        _animator.SetBool("is_moving", false);
+        _animator.SetBool(isFalling_id, isFalling);
     }
 
 }
