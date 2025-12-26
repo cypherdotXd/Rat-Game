@@ -6659,7 +6659,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7693933949333747400}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 73b3519f027494171aa7302b229b60be, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -9005,7 +9005,7 @@ PrefabInstance:
     - target: {fileID: 1603776567265659994, guid: 26f4ccda8f4b045a3943a09b70548af5,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0652
+      value: 0.50090003
       objectReference: {fileID: 0}
     - target: {fileID: 1603776567265659994, guid: 26f4ccda8f4b045a3943a09b70548af5,
         type: 3}
@@ -9497,7 +9497,6 @@ GameObject:
   - component: {fileID: 889188774329988462}
   - component: {fileID: 6586294674033065993}
   - component: {fileID: 6586294674033065994}
-  - component: {fileID: 6586294674033065995}
   m_Layer: 0
   m_Name: pillow_2.002
   m_TagString: Untagged
@@ -11767,7 +11766,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3234056988081489413}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 73b3519f027494171aa7302b229b60be, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -11790,7 +11789,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3234056988081489413}
   serializedVersion: 5
-  m_Mass: 0.001
+  m_Mass: 0.1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -11809,19 +11808,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &6586294674033065995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3234056988081489413}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f37f9b976b62b4d9ebda72ede5612b7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Bouncy
-  _bounceForce: 5
 --- !u!23 &6594576239354803562
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -12209,7 +12195,7 @@ PrefabInstance:
     - target: {fileID: 5257588276813807091, guid: b8744ab55d292497abd3060e32c2f20d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.1343
+      value: 0.57
       objectReference: {fileID: 0}
     - target: {fileID: 5257588276813807091, guid: b8744ab55d292497abd3060e32c2f20d,
         type: 3}
@@ -12856,7 +12842,6 @@ GameObject:
   - component: {fileID: 4528272040794563929}
   - component: {fileID: 345650545001777586}
   - component: {fileID: 8752377974784378699}
-  - component: {fileID: 8752377974784378700}
   m_Layer: 0
   m_Name: pillow_2.001
   m_TagString: Untagged
@@ -13669,7 +13654,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7693933949333747400}
   serializedVersion: 5
-  m_Mass: 0.0001
+  m_Mass: 0.1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -13688,19 +13673,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &8752377974784378700
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7693933949333747400}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f37f9b976b62b4d9ebda72ede5612b7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Bouncy
-  _bounceForce: 5
 --- !u!33 &8897240366773348700
 MeshFilter:
   m_ObjectHideFlags: 0

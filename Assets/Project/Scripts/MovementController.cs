@@ -26,7 +26,7 @@ public class MovementController : StateMachineBehaviour<MovementController>
     public Vector3 origin;
 	public RaycastHit groundHitInfo;
 	public RaycastHit wallHitinfo;
-	public bool isGrounded;
+	public bool isGrounded = true;
 	public bool isWallInFront;
 	
 	[SerializeField] float speedMultiplier = 1f;
@@ -73,12 +73,9 @@ public class MovementController : StateMachineBehaviour<MovementController>
 	    FixedUpdateState();
 	    
         // var isGround = Physics.Raycast(playerCollider.bounds.center, -transform.up, out groundHitInfo, playerCollider.bounds.extents.y + 1f, ~_layerMask);
-        var isGround = Physics.SphereCast(playerCollider.bounds.center, 0.05f, -transform.up, 
-	        out groundHitInfo, playerCollider.bounds.extents.y + 50f, ~_layerMask);
+        var isGround = Physics.SphereCast(playerCollider.bounds.center + 0.02f * Vector3.up, 0.05f, -Vector3.up, out groundHitInfo, 50f, ~_layerMask);
+        // Debug.Log($"isGround: {isGround}, distance: {groundHitInfo.distance}");
         isGrounded = isGround && groundHitInfo.distance < 0.035f;
-        // if(isGround)
-	        // Debug.Log($"d:{groundHitInfo.distance}");
-        // if(isGround) print(groundHitInfo.distance);
         isWallInFront = Physics.Raycast(playerCollider.bounds.center - 0.5f * playerCollider.bounds.extents.y * Vector3.up,
 	        transform.forward, out wallHitinfo, playerCollider.bounds.extents.z + 0.05f, ~_layerMask, QueryTriggerInteraction.Collide);
         
@@ -131,6 +128,7 @@ public class MoveState : StateBase<MovementController>
 			var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
 			return input.sqrMagnitude < 0.001f;
 		});
+		AddTransition(new FallingState(_machine), context => context.groundHitInfo.distance > 0.45f);
 		var animationController = _machine.animationController;
 		animationController.PlayWalkRunAnimation();
 		var cameraMotion = _machine.cameraMotion;
@@ -376,7 +374,7 @@ public class JumpState : StateBase<MovementController>
 		AddTransition(_machine.LastState, controller =>
 		{
 			if (!_jumpExecuted) return false;
-			var jumpEnded =  controller.velocity.y <= -0.01f && controller.groundHitInfo.distance < 0.35f;
+			var jumpEnded =  controller.velocity.y <= -0.01f && controller.groundHitInfo.distance < 0.4f;
 			if (jumpEnded)
 				controller.animationController.PlayLandingAnimation();
 			return jumpEnded;
@@ -407,19 +405,54 @@ public class JumpState : StateBase<MovementController>
 			rb.AddForce(direction * 0.2f, ForceMode.Force);
 		if (_jumpExecuted)
 		{
-			var isFalling = _machine.velocity.y <= -0.5f && _machine.groundHitInfo.distance > 0.4f;
-			animController.PlayFallingAnimation(isFalling);
+			var isFalling = _machine.velocity.y <= -0.5f && _machine.groundHitInfo.distance > 0.46f;
+			animController.NotifyFalling(isFalling);
 		}
 		if (_jumpExecuted) return;
 		_jumpTimer += Time.fixedDeltaTime;
 		if (_jumpTimer < _jumpDelay) return;
 		_jumpExecuted = true;
-		rb.AddForce(_jumpForce * Vector3.up, ForceMode.Impulse);
+		rb.AddForce(_jumpForce * Vector3.up + _jumpForce * 0.3f * rb.transform.forward, ForceMode.Impulse);
 	}
 
 	public override void ExitState()
 	{
 		_jumpTimer = 0;
 		_jumpExecuted = false;
+	}
+}
+
+public class FallingState : StateBase<MovementController>
+{
+	private readonly MovementController _machine;
+
+	public FallingState(MovementController stateMachine) : base(stateMachine)
+	{
+		_machine = stateMachine;
+	}
+
+	public override void EnterState()
+	{
+		Debug.Log("Entering Fall State");
+		var animController =  _machine.animationController;
+		
+		AddTransition(_machine.LastState is WallClimbState or JumpState ? new IdleState(_machine) : _machine.LastState, controller => controller.groundHitInfo.distance < 0.4f);
+		
+		animController.PlayFallingAnimation();
+	}
+
+	public override void UpdateState()
+	{
+		TryTransition(_machine);
+	}
+
+	public override void FixedUpdateState()
+	{
+	}
+
+	public override void ExitState()
+	{
+		var animController =  _machine.animationController;
+		animController.PlayLandingAnimation();
 	}
 }

@@ -9,6 +9,8 @@ using UnityEngine.InputSystem;
 
 public class StateController : MonoBehaviour
 {
+    private static readonly int Land = Animator.StringToHash("Land");
+    private static readonly int IsMoving = Animator.StringToHash("is_moving");
     [SerializeField] private Animator _animator;
 	[SerializeField] private LayerMask _layerMask;
 	[SerializeField] private float _landTriggerDistance = 0.1f;
@@ -17,9 +19,6 @@ public class StateController : MonoBehaviour
     private TweenerCore<float, float, FloatOptions> _moveThresholdTween;
 
     public bool _isJumping;
-    public bool _isFalling;
-    public bool _isLanding;
-    public bool _isClimbing;
     public bool _isGrounded;
     public bool _isGroundInReach;
     private RaycastHit _landHitInfo;
@@ -63,7 +62,6 @@ public class StateController : MonoBehaviour
             _collider.bounds.extents.y + 1f, ~_layerMask);
         _isGrounded = _isGroundInReach && _landHitInfo.distance < 0.035f;
         // animation bools
-        _isFalling = !_isGrounded && _rb.linearVelocity.y < -0.05f;
         // _animator.SetBool(isFalling_id, _isFalling);
     }
     
@@ -124,19 +122,26 @@ public class StateController : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
         print($"LAND");
-        _animator.SetTrigger("Land");
+        _animator.SetTrigger(Land);
     }
 
     public void PlayLandingAnimation()
     {
-        _animator.SetTrigger("Land");
-        _animator.SetBool("is_moving", false);
+        _animator.SetTrigger(Land);
+        _animator.SetBool(IsMoving, false);
+        _animator.SetBool(isFalling_id, false);
     }
     
-    public void PlayFallingAnimation(bool isFalling)
+    public void NotifyFalling(bool isFalling)
     {
-        _animator.SetBool("is_moving", false);
+        _animator.SetBool(IsMoving, false);
         _animator.SetBool(isFalling_id, isFalling);
+    }
+    
+    public void PlayFallingAnimation()
+    {
+        _animator.SetBool(IsMoving, false);
+        _animator.SetTrigger("Fall");
     }
 
 }
