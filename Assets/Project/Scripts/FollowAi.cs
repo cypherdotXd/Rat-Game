@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Behaviour;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Serialization;
 
 public class FollowAi : MonoBehaviour
 {
@@ -14,20 +13,17 @@ public class FollowAi : MonoBehaviour
     
     private NavMeshAgent navAgent;
     private float updateTimer;
-    private BehaviourTree bt;
+    // private BehaviourTree bt;
 
     private void Awake()
     {
         navAgent = GetComponent<NavMeshAgent>();
-        bt = new("BT");
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        bt
-            .AddChild(new LeafNode("l1", new PatrolStrategy(navAgent, patrolPoints)))
-            .AddChild(new LeafNode("l2", new PatrolStrategy(navAgent, patrolPoints2)));
+        
     }
 
     // Update is called once per frame
@@ -35,7 +31,10 @@ public class FollowAi : MonoBehaviour
     {
         // var s = bt.Run();
         // print(s);
-        // UpdateNavDestination();
+        UpdateNavDestination();
+        var d = Vector3.Distance(transform.position, target.position);
+        if(d > 0.2f) return;
+        Destroy(target.gameObject);
     }
 
     private void UpdateNavDestination()

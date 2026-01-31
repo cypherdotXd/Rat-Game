@@ -68,7 +68,7 @@ public class StateController : MonoBehaviour
     public void PlayWalkRunAnimation(float? threshold = null, float transitionTime = 0)
     {
         _animator.SetBool("is_moving", true);
-        _animator.SetTrigger("MoveOnGround");
+        // _animator.SetTrigger("MoveOnGround");
         var targetValue = threshold ?? _moveAnimState;
         _moveThresholdTween?.Kill();
         if (transitionTime == 0)
@@ -100,6 +100,7 @@ public class StateController : MonoBehaviour
         _isJumping = true;
         _animator.SetBool("is_moving", false);
         _animator.SetTrigger(Jump_id);
+        _animator.ResetTrigger("Land");
         // if(_jumpRoutine != null)
         //     StopCoroutine(_jumpRoutine);
         // _jumpRoutine = StartCoroutine(TryLanding());

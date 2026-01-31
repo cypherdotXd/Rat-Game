@@ -44,6 +44,7 @@ public class TouchInputManager : MonoBehaviour
 
     public void Update()
     {
+        #if UNITY_ANDROID || UNITY_IOS
         // iterating over all the touches
         foreach (Touch touch in Touch.activeTouches)
         {
@@ -70,5 +71,9 @@ public class TouchInputManager : MonoBehaviour
                 DistanceR = touch.startScreenPosition - touch.startScreenPosition;
             }
         }
+        #else
+        DeltaL = InputMain.look.ReadValue<Vector2>();
+        DeltaR = InputMain.look.ReadValue<Vector2>();
+        #endif
     }
 }

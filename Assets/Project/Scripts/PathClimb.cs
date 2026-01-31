@@ -34,9 +34,7 @@ public class PathClimb : MonoBehaviour
 
     private void Attach(GameObject interactor)
     {
-        print(interactor.name);
         if(!interactor.CompareTag("Player")) return;
-        print(interactor.name);
         pathClimbed = 0.01f;
         var isPlayer = interactor.TryGetComponent(out MovementController movement);
         if(isPlayer)

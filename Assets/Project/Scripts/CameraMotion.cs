@@ -1,21 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class CameraMotion : MonoBehaviour
+public class CameraMotion : MonoBehaviour, ICameraMotion
 {
     [SerializeField] float _sensitivity = 0.1f;
+    [SerializeField] float _smoothness = 0.07f;
     [SerializeField] float _distance = 1f;
+    [SerializeField] private float min = 90;
+    [SerializeField] private float max = 360 - 30;
     [SerializeField] bool _isInTightSpace = false;
     [SerializeField] Vector3 _offset;
+    [SerializeField] Vector3 _lookInput;
     [SerializeField] Camera _camera;
+    // [SerializeField]  _camera;
     [SerializeField] Camera _fpsCamera;
     [SerializeField] Transform _followTarget;
     [SerializeField] Transform _origin;
     [SerializeField] private LayerMask _ignoreLayers;
-    [SerializeField] private float min = 90;
-    [SerializeField] private float max = 360 - 30;
 
     private Coroutine _lookTransitionRoutine;
     private Collider[] _nearbyColliders;
@@ -31,8 +35,8 @@ public class CameraMotion : MonoBehaviour
         _camera.transform.localPosition = Vector3.back * _distance;
         // _ignoreLayers = ~_followTarget.gameObject.layer;
         //if (transform.parent == _followTarget)
-
     }
+
 
     private void Start()
     {
@@ -63,24 +67,17 @@ public class CameraMotion : MonoBehaviour
 
     void LateUpdate()
     {
-        Vector3 lookInput = TouchInputManager.DeltaR;
-
+        SetLookInput();
         //Vector3 offset = transform.right * _offset.x + transform.up * _offset.y + transform.forward * _offset.z;
         Vector3 offset = _followTarget.TransformPoint(_offset);
         transform.position = offset;
         
-        _camera.transform.localPosition = Vector3.Lerp(_camera.transform.localPosition, Vector3.back * hitDistance, 10*_sensitivity * Time.deltaTime);
+        // _camera.transform.localPosition = Vector3.Lerp(_camera.transform.localPosition, Vector3.back * hitDistance, 20 * Time.deltaTime);
+        _camera.transform.localPosition = Vector3.Lerp(_camera.transform.localPosition, Vector3.back * hitDistance, 1);
         
-        xRot -= lookInput.y * _sensitivity;
-        yRot += lookInput.x * _sensitivity;
-        // Clamp xRot to be either greater than 300 or less than 15
-        // if (xRot >= min && xRot <= max)
-        // {
-        //     // Determine whether to set xRot to 15 or 300 based on proximity
-        //     xRot = (xRot - min < max - xRot) ? min : max;
-        // }
+        xRot -= _lookInput.y * _sensitivity;
+        yRot += _lookInput.x * _sensitivity;
         
-        // yRot = Mathf.Clamp(yRot, 0, 360);
         yRot = Mathf.Repeat(yRot + 180f, 360f) - 180f;
         xRot = Mathf.Clamp(xRot, min, max);
 
@@ -92,25 +89,29 @@ public class CameraMotion : MonoBehaviour
         }
         else
         {
-            // var verticalRotation = Quaternion.AngleAxis(xRot, Vector3.right);
-            // var horizontalRotation = Quaternion.AngleAxis(yRot, Vector3.up);
             // Apply horizontal rotation around the world/player's up axis
-            var horizontalRotation = Quaternion.AngleAxis(lookInput.x * _sensitivity, Vector3.up);
+            var horizontalRotation = Quaternion.AngleAxis(_lookInput.x * _sensitivity, Vector3.up);
             targetLookDirection = horizontalRotation * targetLookDirection;
 
             // Apply vertical rotation around the camera's current right axis (perpendicular to look direction)
             var rightAxis = Vector3.Cross(Vector3.up, targetLookDirection).normalized;
-            var verticalRotation = Quaternion.AngleAxis(-lookInput.y * _sensitivity, rightAxis);
+            var verticalRotation = Quaternion.AngleAxis(-_lookInput.y * _sensitivity, rightAxis);
             targetLookDirection = verticalRotation * targetLookDirection;
             targetLookDirection = ClampVerticalDirection(targetLookDirection, -70, 30);
             
             var targetRotation = Quaternion.LookRotation(targetLookDirection);
-            transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRotation, 15 * Time.deltaTime);
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRotation, (1/_smoothness) * Time.deltaTime);
             // transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, yRot, 0) * Quaternion.Euler(xRot, 0, 0), 15 * Time.deltaTime);
         }
     }
 
-    public void StartLookFollow()
+    private void SetLookInput()
+    {
+        var xLook = TouchInputManager.InputMain.move.ReadValue<Vector2>().x * 10;
+        _lookInput = new Vector3(0.5f * xLook + TouchInputManager.DeltaR.x, TouchInputManager.DeltaR.y, 0);
+    }
+
+    public void StartDirectionFollow()
     {
         if(_lookTransitionRoutine != null) StopCoroutine(_lookTransitionRoutine);
         _lookTransitionRoutine = StartCoroutine(StartFollowRoutine());
@@ -122,7 +123,7 @@ public class CameraMotion : MonoBehaviour
         _doLookFollow = true;
     }
 
-    public void EndLookFollow()
+    public void EndDirectionFollow()
     {
         if(_lookTransitionRoutine != null) StopCoroutine(_lookTransitionRoutine);
         _doLookFollow = false;
