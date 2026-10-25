@@ -1,130 +1,131 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace MIRA
 {
-    
-    public abstract class StateMachineBehaviour<T> : MonoBehaviour where T : StateMachineBehaviour<T>
+    public abstract class StateMachine<T> : MonoBehaviour where T : StateMachine<T>
     {
         public StateBase<T> CurrentState { get; private set; }
         public StateBase<T> LastState { get; private set; }
-    
-        protected virtual void Start()
-        {
-            CurrentState?.EnterState();
-        }
-    
-        public void SwitchState(StateBase<T> newState, float delayTime = -1)
+
+        public event Action<StateBase<T>, StateBase<T>> OnStateChanged;
+
+        private Coroutine _delayedSwitchRoutine;
+
+        public void SwitchState(StateBase<T> newState, float delayTime = -1f)
         {
             if (newState == null) return;
-            if (delayTime > 0)
+
+            if (_delayedSwitchRoutine != null)
             {
-                StartCoroutine(SwitchStateRoutine(newState, delayTime));
+                StopCoroutine(_delayedSwitchRoutine);
+                _delayedSwitchRoutine = null;
+            }
+
+            if (delayTime > 0f)
+            {
+                _delayedSwitchRoutine = StartCoroutine(SwitchStateRoutine(newState, delayTime));
             }
             else
             {
-                // Debug.Log("Switching to " + newState.GetType().Name);
-                LastState = CurrentState;
-                CurrentState?.ExitState();
-                CurrentState = newState;
-                CurrentState.EnterState();
+                ExecuteStateSwitch(newState);
             }
         }
 
-        public IEnumerator SwitchStateRoutine(StateBase<T> newState, float delayTime)
+        private IEnumerator SwitchStateRoutine(StateBase<T> newState, float delayTime)
         {
-            if (newState == null) yield break;
             yield return new WaitForSeconds(delayTime);
-            
-            // Debug.Log("Switching to " + newState.GetType().Name);
+            _delayedSwitchRoutine = null;
+            ExecuteStateSwitch(newState);
+        }
+
+        private void ExecuteStateSwitch(StateBase<T> newState)
+        {
             LastState = CurrentState;
             CurrentState?.ExitState();
+
             CurrentState = newState;
             CurrentState.EnterState();
+
+            OnStateChanged?.Invoke(LastState, CurrentState);
         }
-    
-        protected void UpdateState()
+
+        protected void UpdateState() => CurrentState?.UpdateState();
+        protected void FixedUpdateState() => CurrentState?.FixedUpdateState();
+
+        protected virtual void OnDisable()
         {
-            CurrentState?.UpdateState();
+            if (_delayedSwitchRoutine != null)
+            {
+                StopCoroutine(_delayedSwitchRoutine);
+                _delayedSwitchRoutine = null;
+            }
         }
-    
-        protected void FixedUpdateState()
-        {
-            CurrentState?.FixedUpdateState();
-        }
-    
-        // Optional: For debugging
+
         public string GetCurrentStateName() => CurrentState?.GetType().Name ?? "None";
     }
 
-    public abstract class StateBase<T> where T : StateMachineBehaviour<T>
+    public abstract class StateBase<T> where T : StateMachine<T>
     {
-        public T StateMachine { get; private set; }
-        protected List<Transition<T>> transitions = new();
+        public T StateMachine { get; }
+        protected readonly List<Transition<T>> transitions = new();
 
-        public StateBase(T stateMachine)
+        protected StateBase(T stateMachine)
         {
             StateMachine = stateMachine;
         }
-        
+
         public void AddTransition(StateBase<T> toState, Func<T, bool> condition)
         {
             transitions.Add(new Transition<T>(toState, condition));
         }
-    
-        // Check all transitions and return the state to switch to (or null)
-        public bool CheckTransitions(T machine, out StateBase<T> nextState)
+
+        public void ClearTransitions()
+        {
+            transitions.Clear();
+        }
+
+        public bool CheckTransitions(out StateBase<T> nextState)
         {
             nextState = null;
-            foreach (var transition in transitions.Where(t => t.ShouldTransition(machine)))
+            for (int i = 0; i < transitions.Count; i++)
             {
-                nextState = transition.ToState;
-                return true;
+                if (transitions[i].ShouldTransition(StateMachine))
+                {
+                    nextState = transitions[i].ToState;
+                    return true;
+                }
             }
             return false;
         }
 
-        public void TryTransition(T machine)
+        public void TryTransition()
         {
-            var doTransition = CheckTransitions(machine, out var nextState); 
-            if(doTransition) machine.SwitchState(nextState);
+            if (CheckTransitions(out var nextState))
+            {
+                StateMachine.SwitchState(nextState);
+            }
         }
-        
-        public abstract void EnterState();
-        public abstract void UpdateState();
-        public abstract void FixedUpdateState();
-        public abstract void ExitState();
+
+        public virtual void EnterState() { }
+        public virtual void UpdateState() { }
+        public virtual void FixedUpdateState() { }
+        public virtual void ExitState() { }
     }
-    
-    public class Transition<T> where T : StateMachineBehaviour<T>
+
+    public class Transition<T> where T : StateMachine<T>
     {
-        public StateBase<T> ToState { get; private set; }
-        public Func<T, bool> Condition { get; private set; }
-    
+        public StateBase<T> ToState { get; }
+        public Func<T, bool> Condition { get; }
+
         public Transition(StateBase<T> toState, Func<T, bool> condition)
         {
             ToState = toState;
             Condition = condition;
         }
-    
-        public bool ShouldTransition(T machine)
-        {
-            return Condition(machine);
-        }
-    }
 
-    public class Trigger<T> where T : StateMachineBehaviour<T>
-    {
-        public StateBase<T> ToState { get; private set; }
-        public Action<T> Action { get; private set; }
-        
-        public Trigger(StateBase<T> toState, Action<T> action)
-        {
-            ToState = toState;
-            Action = action;
-        }
+        public bool ShouldTransition(T machine) => Condition(machine);
     }
 }

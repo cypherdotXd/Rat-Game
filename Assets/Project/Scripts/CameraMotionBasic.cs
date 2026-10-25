@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CameraMotionBasic : MonoBehaviour, ICameraMotion
+public class CameraMotionBasic : MonoBehaviour
 {
     public void SetFov(float fov, float time = 0)
     {

@@ -31,8 +31,9 @@ public class MobileCameraInputController : InputAxisControllerBase<MobileCameraI
             // if (EventSystem.current.IsPointerOverGameObject(0))
             //     return 0;
             var lookInput = TouchInputManager.DeltaR;
-            var xLook = m_action.action.ReadValue<Vector2>().x;
-            m_Value = new Vector3(multiplier * xLook + 15f * lookInput.x, -lookInput.y);
+            // var xLook = m_action.action.ReadValue<Vector2>().x;
+            // m_Value = new Vector3(multiplier * xLook + 15f * lookInput.x, -lookInput.y);
+            m_Value = new Vector3(15f * lookInput.x, -lookInput.y);
             return (hint == IInputAxisOwner.AxisDescriptor.Hints.Y ? m_Value.y : m_Value.x);
         }
     }

@@ -8,7 +8,6 @@ public class PathClimb : MonoBehaviour
     [SerializeField] private int _segments;
     [SerializeField] private SplineContainer _spline;
     [SerializeField] private LineRenderer _line;
-    [SerializeField] private Interactable _interactable;
     
     public float pathClimbed; // 0 to 1
 
@@ -19,26 +18,17 @@ public class PathClimb : MonoBehaviour
 
     private void OnEnable()
     {
-        _interactable.OnInteract += Attach;
+        
     }
 
     private void OnDisable()
     {
-        _interactable.OnInteract -= Attach;
+        
     }
 
     private void Start()
     {
         DrawLine(_segments);
-    }
-
-    private void Attach(GameObject interactor)
-    {
-        if(!interactor.CompareTag("Player")) return;
-        pathClimbed = 0.01f;
-        var isPlayer = interactor.TryGetComponent(out MovementController movement);
-        if(isPlayer)
-            movement.NotifyClimbPathBegin(this);
     }
 
     public bool ClimbIncrementally(Transform target, float increment, float startClimb = -1f)

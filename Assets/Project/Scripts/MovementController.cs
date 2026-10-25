@@ -1,494 +1,113 @@
 using System;
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using MIRA;
-using Debug = UnityEngine.Debug;
 
-public class MovementController : StateMachineBehaviour<MovementController>
+// This will work as a central manager, dependencies provider.
+public class MovementController : StateMachine<MovementController>
 {
-	[Header("References")]
-	[SerializeField] private Transform mesh;
-	
-	[Space(10)]
+	[Header("Deps")]
+	[SerializeField] private Transform _mesh;
 	[SerializeField] private LayerMask _layerMask;
-	[SerializeField] private AnimationCurve _inputStateCurve;
+	[SerializeField] private AnimationCurve _inputSpeedCurve;
+	[SerializeField] private CameraMotionBasic _cameraMotion;
+	[SerializeField] private Transform _cameraRig;
+	[SerializeField] private Rigidbody _rb;
+	[SerializeField] private CapsuleCollider _playerCollider;
+	[SerializeField] private StateAnimationSyncer _animationSyncer;
 
-	public Vector3 velocity;
-	public CameraMotionBasic cameraMotion;
-	public AnimationCurve inputSpeedCurve;
-	public Transform cameraRig;
-    public float walkSpeed = 0.7f;
-	public float acceleration = 4f;
-	public Rigidbody rb;
-	public CapsuleCollider playerCollider;
-    public Vector3 origin;
-	public RaycastHit GroundHitInfo;
-	public RaycastHit WallHitInfo;
-	public bool isGrounded = true;
-	public bool isWallInFront;
-	
-	[SerializeField] float speedMultiplier = 1f;
-	[SerializeField] float maxJumpHeight = 0.4f;
-	[SerializeField] float jumpForce = 0.4f;
-	[SerializeField] float climbTimeout = 0.5f;
-	[SerializeField] float climbForce = 0.6f;
-	[SerializeField] float turnAcceleration = 10f;
+	[Header("Movement Settings")]
+	[SerializeField] private float _walkSpeed = 0.7f;
+	[SerializeField] private float _acceleration = 4f;
+	[SerializeField] private float _speedMultiplier = 1f;
+	[SerializeField] private float _rotationSpeed = 8f;
+	[SerializeField] private float _jumpForce = 3.5f;
+	[SerializeField] private float _climbTimeout = 50f;
+	[SerializeField] private float _climbForce = 1.5f;
 
-	public StateController animationController;
-	public bool isClimbingPath;
-    private float currentForwardSpeed;
-	private Vector3 targetVelocity;
-	private Vector3 input;
-	private PathClimb _pathClimb;
-	private Coroutine _climbCoroutine;
+	public Transform Mesh => _mesh;
+	public LayerMask LayerMask => _layerMask;
+	public AnimationCurve InputSpeedCurve => _inputSpeedCurve;
+	public CameraMotionBasic CameraMotion => _cameraMotion;
+	public Transform CameraRig => _cameraRig;
+	public Rigidbody Rb => _rb;
+	public CapsuleCollider PlayerCollider => _playerCollider;
+	public StateAnimationSyncer AnimationSyncer => _animationSyncer;
+
+	public float WalkSpeed => _walkSpeed;
+	public float Acceleration => _acceleration;
+	public float SpeedMultiplier => _speedMultiplier;
+	public float RotationSpeed => _rotationSpeed;
+	public float JumpForce => _jumpForce;
+	public float ClimbTimeout => _climbTimeout;
+	public float ClimbForce => _climbForce;
+
+	public Vector2 MoveInput { get; private set; }
+	public InputAction JumpAction { get; private set; }
+	public Vector3 Velocity;
+	public Vector3 Origin;
+	[NonSerialized] public RaycastHit GroundHitInfo;
+	[NonSerialized] public RaycastHit WallHitInfo;
+	public bool IsGrounded { get; private set; }
+	public bool IsWallInFront { get; private set; }
+
+	public MoveState MoveState { get; private set; }
+	public IdleState IdleState { get; private set; }
+	public WallClimbState WallClimbState { get; private set; }
+	public JumpState JumpState { get; private set; }
+	public FallingState FallingState { get; private set; }
 
 	private void Awake()
 	{
+#if UNITY_EDITOR
+		Cursor.lockState = CursorLockMode.Locked;
+#endif
 		Application.targetFrameRate = 60;
-		playerCollider = GetComponent<CapsuleCollider>();
-		// rb = GetComponent<Rigidbody>();
-		animationController = GetComponent<StateController>();
-	}
-	
-	private void Start()
-	{
-		// Cursor.lockState = CursorLockMode.Locked;
-		// State : IDLE, WALK, SPRINT, WALL CLIMB
-		var moveState = new MoveState(this);
-		SwitchState(moveState);
+		if (!_playerCollider) _playerCollider = GetComponent<CapsuleCollider>();
+		if (!_rb) _rb = GetComponent<Rigidbody>();
+		if (!_animationSyncer) _animationSyncer = GetComponent<StateAnimationSyncer>();
+
+		JumpAction = InputSystem.actions.FindAction("jump");
+
+		MoveState = new MoveState(this);
+		IdleState = new IdleState(this);
+		WallClimbState = new WallClimbState(this, _climbTimeout, _climbForce);
+		JumpState = new JumpState(this, _jumpForce);
+		FallingState = new FallingState(this);
 	}
 
-    private void Update()
-    {
-        // MoveWithSpeed(walkSpeed, input, acceleration);
-        UpdateState();
-        velocity = rb.linearVelocity;
+	private void Start()
+	{
+		SwitchState(MoveState);
+	}
+
+	private void Update()
+	{
+		MoveInput = TouchInputManager.InputMain.move.ReadValue<Vector2>();
+		UpdateState();
+		Velocity = _rb.linearVelocity;
 	}
 
 	private void FixedUpdate()
-    {
-	    FixedUpdateState();
-	    
-        
-        isWallInFront = Physics.Raycast(playerCollider.bounds.center + 0.5f * playerCollider.bounds.extents.y * Vector3.up,
-	        transform.forward, out WallHitInfo, playerCollider.bounds.extents.z + 0.15f, ~_layerMask, QueryTriggerInteraction.Collide);
-        Debug.DrawRay(playerCollider.bounds.center + 0.5f * playerCollider.bounds.extents.y * Vector3.up, 
-	        transform.forward * (playerCollider.bounds.extents.z + 0.15f), Color.chartreuse);
-        
-        origin = playerCollider.bounds.center - playerCollider.bounds.extents.y * Vector3.up;
-    }
+	{
+		UpdateGroundRaycast();
+		FixedUpdateState();
+
+		IsWallInFront = Physics.Raycast(_playerCollider.bounds.center + 0.5f * _playerCollider.bounds.extents.y * Vector3.up,
+			transform.forward, out WallHitInfo, _playerCollider.bounds.extents.z + 0.15f, ~_layerMask, QueryTriggerInteraction.Collide);
+		Debug.DrawRay(_playerCollider.bounds.center + 0.5f * _playerCollider.bounds.extents.y * Vector3.up, 
+			transform.forward * (_playerCollider.bounds.extents.z + 0.15f), Color.chartreuse);
+
+		Origin = _playerCollider.bounds.center - _playerCollider.bounds.extents.y * Vector3.up;
+	}
 
 	public void UpdateGroundRaycast()
 	{
-		var isGround = Physics.SphereCast(playerCollider.bounds.center, 0.01f, -Vector3.up, out GroundHitInfo, 50f, ~_layerMask);
-		isGrounded = isGround && GroundHitInfo.distance < 0.035f;
-		Debug.DrawLine(playerCollider.bounds.center,
-			isGround ? GroundHitInfo.point : playerCollider.bounds.center + Vector3.down,
+		var isGround = Physics.SphereCast(_playerCollider.bounds.center, 0.01f, -Vector3.up, out GroundHitInfo, 2f, ~_layerMask);
+		IsGrounded = isGround && GroundHitInfo.distance < 0.035f;
+		Debug.DrawLine(_playerCollider.bounds.center,
+			isGround ? GroundHitInfo.point : _playerCollider.bounds.center + Vector3.down,
 			isGround ? Color.red : Color.green, 
 			3);
-	}
-
-	public void NotifyClimbPathBegin(PathClimb pathClimb)
-	{
-		print("Climb");
-		_pathClimb = pathClimb;
-		isClimbingPath = true;
-	}
-
-	public void ClimbPath()
-	{
-		print("climbing Start");
-		isClimbingPath = _pathClimb.ClimbIncrementally(transform, 0.1f * Time.deltaTime * input.y);
-		rb.isKinematic = isClimbingPath;
-		animationController.ChangeMoveState(input.y);
-	}
-}
-
-public class MoveState : StateBase<MovementController>
-{
-	private float _speedMultiplier = 1f;
-	private float _currentForwardSpeed;
-	private Vector3 _targetVelocity;
-	private MovementController _machine;
-
-	public MoveState(MovementController stateMachine) : base(stateMachine)
-	{
-		_machine = stateMachine;
-	}
-
-	public override void EnterState()
-	{
-		Debug.Log("Entering Move State");
-		InputSystem.actions.FindAction("jump").performed += SwitchToJumpState;
-		AddTransition(new IdleState(_machine), _ =>
-		{
-			var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-			return input.sqrMagnitude < 0.001f;
-		});
-		AddTransition(new FallingState(_machine), context => context.GroundHitInfo.distance > 0.45f);
-		var animationController = _machine.animationController;
-		animationController.PlayWalkRunAnimation();
-		var cameraMotion = _machine.cameraMotion;
-		cameraMotion.SetFov(80, 0.6f);
-		cameraMotion.SetDistance(0.15f, 0.6f);
-		_machine.rb.isKinematic = false;
-	}
-
-	public override void UpdateState()
-	{
-		
-	}
-
-	public override void FixedUpdateState()
-	{
-		TryTransition(_machine);
-		_machine.UpdateGroundRaycast();
-		var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-		var moveThreshold = _machine.inputSpeedCurve.Evaluate(input.sqrMagnitude);
-		var lookDirection = _machine.cameraRig.forward;
-		var animationController = _machine.animationController;
-		
-		if (moveThreshold < 0.01f) return;
-		animationController.ChangeMoveState(moveThreshold * 1.5f);
-		
-		// Rotate towards camera forward direction when moving
-		var direction = lookDirection;
-		direction.y = 0;
-		var targetRotation = Quaternion.LookRotation(direction);
-		var yAngle = Vector2.SignedAngle(input, Vector2.up);
-		targetRotation *= Quaternion.Euler(0, yAngle, 0);
-		var dampedRot = Quaternion.Slerp(_machine.rb.transform.rotation, targetRotation, 4 * Time.deltaTime);
-		_machine.rb.MoveRotation(dampedRot);
-		
-		_targetVelocity = Vector3.Lerp(_targetVelocity, 
-			_speedMultiplier * _machine.walkSpeed * moveThreshold * _machine.rb.transform.forward, 
-			3 * Time.deltaTime);
-		_targetVelocity.y = _machine.rb.linearVelocity.y;
-
-		if (_machine.rb.linearVelocity.sqrMagnitude > _targetVelocity.sqrMagnitude) return;
-		
-		var forceDirB = targetRotation * Vector3.forward;
-		var forceDirA = _machine.rb.transform.forward;
-		var t = Mathf.Abs(input.x);
-		var d = Vector3.Lerp(forceDirA, forceDirB, t * 0.3f);
-		var force = Mathf.Clamp(Vector3.Distance(_machine.rb.linearVelocity, _targetVelocity), 0, 3);
-		_machine.rb.AddForce(_machine.acceleration * force * d, ForceMode.VelocityChange);
-
-	}
-
-	public override void ExitState()
-	{
-		InputSystem.actions.FindAction("jump").performed -= SwitchToJumpState;
-		var cameraMotion = _machine.cameraMotion;
-		cameraMotion.SetFov(60, 0.6f);
-		cameraMotion.SetDistance(0.3f, 0.6f);
-	}
-	
-	private void SwitchToJumpState(InputAction.CallbackContext _)
-	{
-		_machine.SwitchState(new JumpState(_machine, 3.5f));
-	}
-}
-
-public class IdleState : StateBase<MovementController>
-{
-	private float _currentForwardSpeed;
-	private MovementController _machine;
-	
-	public IdleState(MovementController stateMachine) : base(stateMachine)
-	{
-		_machine = stateMachine;
-	}
-
-	public override void EnterState()
-	{
-		Debug.Log("Entering IdleState");
-		AddTransition(new MoveState(_machine), _ =>
-		{
-			var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-			return input.sqrMagnitude > 0.001f;
-		});
-		var animationController = _machine.animationController;
-		animationController.PlayWalkRunAnimation(0, 0.4f);
-		
-		InputSystem.actions.FindAction("jump").performed += SwitchToJumpState;
-		// InputSystem.actions.FindAction("jump").canceled += SwitchToJumpState;
-	}
-
-	public override void UpdateState()
-	{
-
-		// rb.linearVelocity = Vector3.zero;
-		var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-		TryTransition(_machine);
-
-	}
-
-	public override void FixedUpdateState()
-	{
-		
-	}
-
-	public override void ExitState()
-	{
-		InputSystem.actions.FindAction("jump").performed -= SwitchToJumpState;
-		// InputSystem.actions.FindAction("jump").canceled -= SwitchToJumpState;
-	}
-	
-	private void SwitchToJumpState(InputAction.CallbackContext _)
-	{
-		_machine.SwitchState(new JumpState(_machine, 3.5f));
-	}
-}
-
-public class WallClimbState : StateBase<MovementController>
-{
-	private float _timer;
-	private readonly float _timeOut;
-	private readonly float _climbForce;
-	private bool _currentWallExists = true;
-	private bool _newWallInFront;
-	private Vector3 _wallDir;
-	private Vector3 _lateralDirection;
-	private Vector3 _wallNormal;
-	private readonly LayerMask layerMask;
-
-	private readonly MovementController _machine;
-
-	public WallClimbState(MovementController machine, float timeOut, float climbForce = 1.5f) : base(machine)
-	{
-		_machine = machine;
-		_timeOut = timeOut;
-		_climbForce = climbForce;
-		
-		layerMask = LayerMask.GetMask("Dynamic Object");
-	}
-
-	public override void EnterState()
-	{
-		Debug.Log("Entering Wall Climb");
-
-		var climber = _machine.rb.transform;
-		var wallHitinfo = _machine.WallHitInfo;
-		var animationController = _machine.animationController;
-		_wallDir = (climber.position - wallHitinfo.point).normalized;
-		_wallNormal = wallHitinfo.normal;
-		var climbAngle = Vector3.SignedAngle(climber.forward, -_wallNormal, Vector3.up);
-		_lateralDirection = Quaternion.AngleAxis(climbAngle, -_wallNormal) * Vector3.Cross(climber.right, _wallNormal);
-		
-		AddTransition(new MoveState(_machine),
-			_ => _timer > _timeOut || (!_currentWallExists && !_newWallInFront));
-		
-		var cameraMotion = _machine.cameraMotion;
-		animationController.PlayWalkRunAnimation(1.5f);
-		cameraMotion.StartDirectionFollow();
-	}
-
-	public override void UpdateState()
-	{
-		
-	}
-
-	public override void FixedUpdateState()
-	{
-		TryTransition(_machine);
-
-		var climber = _machine.rb.transform;
-		var rb = _machine.rb;
-		var collider = _machine.playerCollider;
-		var _origin = _machine.origin;
-		var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-		// Debug.DrawRay(wallHitInfo.point, climber.forward, Color.red, 6);
-		
-		_newWallInFront = Physics.Raycast(collider.bounds.center - 0.5f * collider.bounds.extents.y * Vector3.up,
-			climber.forward, out var newWallHitInfo, collider.bounds.extents.z + 0.05f, ~layerMask);
-		if (_newWallInFront)
-		{
-			var diff = Vector3.Dot(newWallHitInfo.normal, _wallNormal);
-			if (diff < 0.8f)
-				ChangeWall(newWallHitInfo);
-		}
-		
-		_timer += Time.fixedDeltaTime;
-		_currentWallExists = Physics.Raycast(_origin, -_wallDir, collider.bounds.extents.z + 0.2f, ~layerMask);
-		
-		_lateralDirection = Quaternion.AngleAxis(Mathf.Atan2(input.x, 1) * 0.08f * Mathf.Rad2Deg, climber.up) * _lateralDirection;
-		var targetRotation = Quaternion.LookRotation(_lateralDirection, _wallNormal);
-		climber.rotation = Quaternion.Slerp(climber.rotation, targetRotation, 15f * Time.fixedDeltaTime);
-		var wallAlignment = Vector3.Dot(rb.transform.up, _wallNormal);
-		// _isClimbing = wallAlignment > 0.98f;
-		
-		// Move Upward
-		var climbDir = (-Vector3.Dot(Vector3.up, climber.forward) + 1f)/2f;
-		climbDir = Mathf.Clamp(climbDir, 0.8f, 1f);
-		var moveDir = climber.forward - 0.4f * climber.up;
-		rb.linearVelocity = _climbForce * climbDir * moveDir;
-	}
-	
-	public override void ExitState()
-	{
-		StopClimbing();
-		// animationController.PlayWalkRunAnimation(1f);
-	}
-
-	private void StopClimbing()
-	{
-		var cameraMotion = _machine.cameraMotion;
-		var cameraRig = _machine.cameraRig;
-		var rb = _machine.rb;
-		
-		rb.isKinematic = false;
-		cameraMotion.EndDirectionFollow();
-		var forward = cameraRig.forward;
-		forward.y = 0;
-		// rb.linearVelocity = 0.5f * rb.linearVelocity.magnitude * transform.forward;
-		forward.y = 0;
-		var r = Quaternion.LookRotation(forward.normalized, _machine.GroundHitInfo.collider ? _machine.GroundHitInfo.normal : Vector3.up);
-		_machine.rb.transform.DORotateQuaternion(r, 0.2f);
-	}
-
-	private void ChangeWall(RaycastHit newWallHitInfo)
-	{
-		Debug.Log("Wall change");
-		var climber = _machine.rb.transform;
-		_timer = 0;
-		_wallNormal = newWallHitInfo.normal;
-		_wallDir = (climber.position - newWallHitInfo.point).normalized;
-		var climbAngle = Vector3.SignedAngle(climber.forward, -_wallNormal, Vector3.up);
-		_lateralDirection = Quaternion.AngleAxis(climbAngle, -_wallNormal) * Vector3.Cross(climber.right, _wallNormal);
-	}
-	
-}
-
-public class JumpState : StateBase<MovementController>
-{
-	private readonly MovementController _machine;
-	private readonly float _jumpForce;
-	private float _jumpTimer;
-	private float _jumpDelay;
-	private bool _jumpExecuted;
-	private bool _jumpButtonUp;
-	
-	public JumpState(MovementController stateMachine, float jumpForce, float jumpDelay = 0.05f) : base(stateMachine)
-	{
-		_machine = stateMachine;
-		_jumpForce = jumpForce;
-		_jumpDelay = jumpDelay;
-	}
-
-	public override void EnterState()
-	{
-		Debug.Log("Entering Jump State");
-		var animController =  _machine.animationController;
-		AddTransition(_machine.LastState, controller =>
-		{
-			if (!_jumpExecuted) return false;
-			var jumpEnded =  controller.velocity.y <= -0.0001f && controller.GroundHitInfo.distance < 0.4f;
-			if (jumpEnded)
-				controller.animationController.PlayLandingAnimation();
-			return jumpEnded;
-		});
-		AddTransition(new WallClimbState(_machine, 50), _ => _machine.isWallInFront && !_machine.isGrounded);
-		animController.PlayJumpAnimation();
-		_jumpTimer = 0;
-		
-		InputSystem.actions.FindAction("jump").canceled += OnJumpCancelAction;
-	}
-
-	public override void UpdateState()
-	{
-		TryTransition(_machine);
-	}
-
-	public override void FixedUpdateState()
-	{
-		_machine.UpdateGroundRaycast();
-		
-		var rb = _machine.rb;
-		var animController =  _machine.animationController;
-		var input = TouchInputManager.InputMain.move.ReadValue<Vector2>();
-
-		var direction = new Vector3(_machine.cameraRig.forward.x, 0,  _machine.cameraRig.forward.z);
-		var targetRotation = Quaternion.LookRotation(direction);
-		var yAngle = Vector2.SignedAngle(input, Vector2.up);
-		targetRotation *= Quaternion.Euler(0, yAngle, 0);
-
-		_jumpTimer += Time.fixedDeltaTime;
-		if (_jumpExecuted)
-		{
-			if (input.sqrMagnitude > 0.1f)
-			{
-				_machine.rb.MoveRotation(Quaternion.Slerp(_machine.rb.transform.rotation, targetRotation, 6 * Time.deltaTime));
-			}
-			rb.AddForce(2.8f * direction, ForceMode.Acceleration);
-			if (!_jumpButtonUp)
-			{
-				rb.AddForce(0.4f * _jumpForce * (Vector3.up + 0.3f * rb.transform.forward), ForceMode.Force);
-			}
-			
-			var isFalling = _machine.velocity.y <= -0.5f && _machine.GroundHitInfo.distance > 0.46f;
-			animController.NotifyFalling(isFalling);
-			return;
-		}
-		
-		if (_jumpTimer < _jumpDelay) return;
-		Jump();
-	}
-
-	public override void ExitState()
-	{
-		InputSystem.actions.FindAction("jump").canceled -= OnJumpCancelAction;
-		_jumpTimer = 0;
-		_jumpExecuted = false;
-	}
-
-	private void Jump()
-	{
-		var rb = _machine.rb;
-		_jumpExecuted = true;
-		rb.AddForce(_jumpForce * Vector3.up, ForceMode.Impulse);
-	}
-
-	private void OnJumpCancelAction(InputAction.CallbackContext _)
-	{
-		_jumpButtonUp = true;
-	}
-}
-
-public class FallingState : StateBase<MovementController>
-{
-	private readonly MovementController _machine;
-
-	public FallingState(MovementController stateMachine) : base(stateMachine)
-	{
-		_machine = stateMachine;
-	}
-
-	public override void EnterState()
-	{
-		Debug.Log("Entering Fall State");
-		var animController =  _machine.animationController;
-		
-		AddTransition(_machine.LastState is WallClimbState or JumpState ? new IdleState(_machine) : _machine.LastState, 
-			controller => controller.GroundHitInfo.distance < 0.4f);
-		
-		animController.PlayFallingAnimation();
-	}
-
-	public override void UpdateState()
-	{
-		TryTransition(_machine);
-	}
-
-	public override void FixedUpdateState()
-	{
-		_machine.UpdateGroundRaycast();
-	}
-
-	public override void ExitState()
-	{
-		var animController =  _machine.animationController;
-		animController.PlayLandingAnimation();
 	}
 }

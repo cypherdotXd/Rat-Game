@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class CameraMotion : MonoBehaviour, ICameraMotion
+public class CameraMotion : MonoBehaviour
 {
     [SerializeField] float _sensitivity = 0.1f;
     [SerializeField] float _smoothness = 0.07f;
