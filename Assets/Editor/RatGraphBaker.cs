@@ -135,7 +135,6 @@ public static class RatGraphBaker
                 ghostInput.Jump = false;
                 ghostInput.MoveDir = heading;
 
-                bool success = false;
                 int maxSteps = 100; // 2 seconds
 
                 for (int step = 0; step < maxSteps; step++)
@@ -227,38 +226,61 @@ public static class RatGraphBaker
     public static int GenerateGroundNodesFromNavMesh(RatGraph graph, float spacing = 1.0f)
     {
         var tri = UnityEngine.AI.NavMesh.CalculateTriangulation();
-        if (tri.vertices == null || tri.vertices.Length == 0)
+        if (tri.vertices == null || tri.vertices.Length == 0 || tri.indices == null || tri.indices.Length == 0)
         {
             Debug.LogWarning("[RatGraphBaker] No NavMesh found in scene. Bake NavMesh or place nodes manually.");
             return 0;
         }
 
+        spacing = Mathf.Max(0.25f, spacing);
         var selectedPoints = new List<Vector3>();
-        float sqrSpacing = spacing * spacing;
+        float sqrMinDist = (spacing * 0.75f) * (spacing * 0.75f);
 
+        // 1. Add NavMesh boundary vertices (corners, doorways)
         for (int i = 0; i < tri.vertices.Length; i++)
         {
             Vector3 v = tri.vertices[i];
-            bool tooClose = false;
-            for (int j = 0; j < selectedPoints.Count; j++)
-            {
-                if ((v - selectedPoints[j]).sqrMagnitude < sqrSpacing)
-                {
-                    tooClose = true;
-                    break;
-                }
-            }
-            if (!tooClose)
+            if (!IsTooClose(v, selectedPoints, sqrMinDist))
                 selectedPoints.Add(v);
         }
 
-        // Create child nodes under RatGraph
+        // 2. Sample the interior of all NavMesh triangles so large rooms/floors are fully covered
+        for (int i = 0; i < tri.indices.Length; i += 3)
+        {
+            Vector3 a = tri.vertices[tri.indices[i]];
+            Vector3 b = tri.vertices[tri.indices[i + 1]];
+            Vector3 c = tri.vertices[tri.indices[i + 2]];
+
+            float minX = Mathf.Min(a.x, Mathf.Min(b.x, c.x));
+            float maxX = Mathf.Max(a.x, Mathf.Max(b.x, c.x));
+            float minZ = Mathf.Min(a.z, Mathf.Min(b.z, c.z));
+            float maxZ = Mathf.Max(a.z, Mathf.Max(b.z, c.z));
+
+            float startX = Mathf.Ceil(minX / spacing) * spacing;
+            float startZ = Mathf.Ceil(minZ / spacing) * spacing;
+
+            for (float x = startX; x <= maxX; x += spacing)
+            {
+                for (float z = startZ; z <= maxZ; z += spacing)
+                {
+                    if (IsPointInTriangle2D(x, z, a, b, c, out float y))
+                    {
+                        Vector3 pt = new Vector3(x, y, z);
+                        if (!IsTooClose(pt, selectedPoints, sqrMinDist))
+                            selectedPoints.Add(pt);
+                    }
+                }
+            }
+        }
+
+        // 3. Create child nodes under RatGraph
         var createdNodes = new List<RatNode>();
         for (int i = 0; i < selectedPoints.Count; i++)
         {
+            Vector3 pt = selectedPoints[i];
             var nodeObj = new GameObject($"GroundNode_{i}");
             nodeObj.transform.parent = graph.transform;
-            nodeObj.transform.position = selectedPoints[i] + Vector3.up * 0.05f;
+            nodeObj.transform.position = pt + Vector3.up * 0.05f;
             var node = nodeObj.AddComponent<RatNode>();
             node.id = i;
             node.SnapToSurface();
@@ -266,32 +288,65 @@ public static class RatGraphBaker
             createdNodes.Add(node);
         }
 
-        // Auto-link adjacent walking nodes with clear line-of-sight
-        float maxWalkDist = spacing * 1.7f;
+        // 4. Auto-link adjacent walking nodes with clear line-of-sight
+        float maxWalkDist = spacing * 1.6f;
         int edgesAdded = 0;
         for (int i = 0; i < createdNodes.Count; i++)
         {
             for (int j = i + 1; j < createdNodes.Count; j++)
             {
-                var a = createdNodes[i];
-                var b = createdNodes[j];
-                float dist = Vector3.Distance(a.Position, b.Position);
+                var n1 = createdNodes[i];
+                var n2 = createdNodes[j];
+                float dist = Vector3.Distance(n1.Position, n2.Position);
                 if (dist <= maxWalkDist)
                 {
-                    if (!Physics.Linecast(a.Position + Vector3.up * 0.08f, b.Position + Vector3.up * 0.08f, out var hit) || hit.collider == a.surfaceCollider || hit.collider == b.surfaceCollider)
+                    bool hitPhys = Physics.Linecast(n1.Position + Vector3.up * 0.08f, n2.Position + Vector3.up * 0.08f, out var hit) &&
+                                   hit.collider != n1.surfaceCollider && hit.collider != n2.surfaceCollider && !hit.collider.isTrigger;
+
+                    bool hitNav = UnityEngine.AI.NavMesh.Raycast(n1.Position, n2.Position, out _, UnityEngine.AI.NavMesh.AllAreas);
+
+                    if (!hitPhys && !hitNav)
                     {
                         float cost = dist / 1.4f;
-                        graph.AddEdge(a, b, EdgeType.WALK, cost);
-                        graph.AddEdge(b, a, EdgeType.WALK, cost);
+                        graph.AddEdge(n1, n2, EdgeType.WALK, cost);
+                        graph.AddEdge(n2, n1, EdgeType.WALK, cost);
                         edgesAdded++;
                     }
                 }
             }
         }
 
-        Debug.Log($"[RatGraphBaker] Auto-generated {createdNodes.Count} ground nodes and {edgesAdded * 2} walk edges from NavMesh!");
+        Debug.Log($"[RatGraphBaker] Successfully generated {createdNodes.Count} ground nodes (spacing: {spacing:F2}m) and {edgesAdded * 2} walk edges!");
         EditorUtility.SetDirty(graph);
         return createdNodes.Count;
+    }
+
+    private static bool IsPointInTriangle2D(float px, float pz, Vector3 a, Vector3 b, Vector3 c, out float y)
+    {
+        y = 0f;
+        float denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+        if (Mathf.Abs(denom) < 0.0001f) return false;
+
+        float w1 = ((b.z - c.z) * (px - c.x) + (c.x - b.x) * (pz - c.z)) / denom;
+        float w2 = ((c.z - a.z) * (px - c.x) + (a.x - c.x) * (pz - c.z)) / denom;
+        float w3 = 1.0f - w1 - w2;
+
+        if (w1 >= -0.01f && w2 >= -0.01f && w3 >= -0.01f)
+        {
+            y = w1 * a.y + w2 * b.y + w3 * c.y;
+            return true;
+        }
+        return false;
+    }
+
+    private static bool IsTooClose(Vector3 pt, List<Vector3> points, float sqrMinDist)
+    {
+        for (int i = 0; i < points.Count; i++)
+        {
+            if ((pt - points[i]).sqrMagnitude < sqrMinDist)
+                return true;
+        }
+        return false;
     }
 }
 
