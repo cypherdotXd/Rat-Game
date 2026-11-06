@@ -33,6 +33,10 @@ public class RatBrain : MonoBehaviour, IRatInput
     private float _stuckCheckTimer;
     private Vector3 _lastStuckCheckPos;
 
+    private readonly Dictionary<RatEdge, float> _tempBlockedEdges = new();
+    private readonly Dictionary<RatEdge, (float baseCost, float timer)> _decayingEdges = new();
+    private bool _wasAirborne;
+
     public Vector3 MoveDir { get; private set; }
 
     public bool Jump
@@ -96,6 +100,15 @@ public class RatBrain : MonoBehaviour, IRatInput
 
         Vector3 currentPos = _controller.transform.position;
         Vector3 targetPos = _target.position;
+
+        UpdateDecays(dt);
+
+        bool isAirborne = !_controller.IsGrounded && !_controller.IsAttached;
+        if (_wasAirborne && !isAirborne && _jumpState == JumpExecutionState.NONE)
+        {
+            ForceRepath();
+        }
+        _wasAirborne = isAirborne;
 
         CheckStuck(dt, currentPos);
 
@@ -310,7 +323,11 @@ public class RatBrain : MonoBehaviour, IRatInput
                 if (_stuckTimer >= 4.0f)
                 {
                     if (_path != null && _pathIndex < _path.Count && _path[_pathIndex].edge != null)
-                        _path[_pathIndex].edge.blocked = true;
+                    {
+                        var edge = _path[_pathIndex].edge;
+                        edge.blocked = true;
+                        _tempBlockedEdges[edge] = 10f;
+                    }
                     ForceRepath();
                     _stuckTimer = 0f;
                 }
@@ -331,10 +348,60 @@ public class RatBrain : MonoBehaviour, IRatInput
         }
     }
 
+    private void UpdateDecays(float dt)
+    {
+        if (_tempBlockedEdges.Count > 0)
+        {
+            var unblockKeys = new List<RatEdge>();
+            var keys = new List<RatEdge>(_tempBlockedEdges.Keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var edge = keys[i];
+                float remaining = _tempBlockedEdges[edge] - dt;
+                if (remaining <= 0f)
+                {
+                    edge.blocked = false;
+                    unblockKeys.Add(edge);
+                }
+                else
+                {
+                    _tempBlockedEdges[edge] = remaining;
+                }
+            }
+            for (int i = 0; i < unblockKeys.Count; i++)
+                _tempBlockedEdges.Remove(unblockKeys[i]);
+        }
+
+        if (_decayingEdges.Count > 0)
+        {
+            var restoreKeys = new List<RatEdge>();
+            var keys = new List<RatEdge>(_decayingEdges.Keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var edge = keys[i];
+                var (baseCost, timer) = _decayingEdges[edge];
+                float remaining = timer - dt;
+                if (remaining <= 0f)
+                {
+                    edge.cost = baseCost;
+                    restoreKeys.Add(edge);
+                }
+                else
+                {
+                    _decayingEdges[edge] = (baseCost, remaining);
+                }
+            }
+            for (int i = 0; i < restoreKeys.Count; i++)
+                _decayingEdges.Remove(restoreKeys[i]);
+        }
+    }
+
     private void RegisterEdgeFailure(RatEdge edge)
     {
         if (edge != null)
         {
+            if (!_decayingEdges.ContainsKey(edge))
+                _decayingEdges[edge] = (edge.cost, 15f);
             edge.cost *= 1.5f;
             if (_debugLogs)
                 Debug.LogWarning($"[RatBrain] Edge {edge.from?.name} -> {edge.to?.name} failed! Cost increased to {edge.cost:F2}");
