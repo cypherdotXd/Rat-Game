@@ -223,17 +223,101 @@ public static class RatGraphBaker
         controller.Initialize();
         return ghost;
     }
+
+    public static int GenerateGroundNodesFromNavMesh(RatGraph graph, float spacing = 1.0f)
+    {
+        var tri = UnityEngine.AI.NavMesh.CalculateTriangulation();
+        if (tri.vertices == null || tri.vertices.Length == 0)
+        {
+            Debug.LogWarning("[RatGraphBaker] No NavMesh found in scene. Bake NavMesh or place nodes manually.");
+            return 0;
+        }
+
+        var selectedPoints = new List<Vector3>();
+        float sqrSpacing = spacing * spacing;
+
+        for (int i = 0; i < tri.vertices.Length; i++)
+        {
+            Vector3 v = tri.vertices[i];
+            bool tooClose = false;
+            for (int j = 0; j < selectedPoints.Count; j++)
+            {
+                if ((v - selectedPoints[j]).sqrMagnitude < sqrSpacing)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+            if (!tooClose)
+                selectedPoints.Add(v);
+        }
+
+        // Create child nodes under RatGraph
+        var createdNodes = new List<RatNode>();
+        for (int i = 0; i < selectedPoints.Count; i++)
+        {
+            var nodeObj = new GameObject($"GroundNode_{i}");
+            nodeObj.transform.parent = graph.transform;
+            nodeObj.transform.position = selectedPoints[i] + Vector3.up * 0.05f;
+            var node = nodeObj.AddComponent<RatNode>();
+            node.id = i;
+            node.SnapToSurface();
+            graph.AddNode(node);
+            createdNodes.Add(node);
+        }
+
+        // Auto-link adjacent walking nodes with clear line-of-sight
+        float maxWalkDist = spacing * 1.7f;
+        int edgesAdded = 0;
+        for (int i = 0; i < createdNodes.Count; i++)
+        {
+            for (int j = i + 1; j < createdNodes.Count; j++)
+            {
+                var a = createdNodes[i];
+                var b = createdNodes[j];
+                float dist = Vector3.Distance(a.Position, b.Position);
+                if (dist <= maxWalkDist)
+                {
+                    if (!Physics.Linecast(a.Position + Vector3.up * 0.08f, b.Position + Vector3.up * 0.08f, out var hit) || hit.collider == a.surfaceCollider || hit.collider == b.surfaceCollider)
+                    {
+                        float cost = dist / 1.4f;
+                        graph.AddEdge(a, b, EdgeType.WALK, cost);
+                        graph.AddEdge(b, a, EdgeType.WALK, cost);
+                        edgesAdded++;
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"[RatGraphBaker] Auto-generated {createdNodes.Count} ground nodes and {edgesAdded * 2} walk edges from NavMesh!");
+        EditorUtility.SetDirty(graph);
+        return createdNodes.Count;
+    }
 }
 
 [CustomEditor(typeof(RatGraph))]
 public class RatGraphEditor : Editor
 {
+    private float _navMeshSpacing = 1.0f;
+
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
         var graph = (RatGraph)target;
         EditorGUILayout.Space(10);
+
+        EditorGUILayout.LabelField("AI Graph Generation & Baking", EditorStyles.boldLabel);
+
+        EditorGUILayout.BeginHorizontal();
+        _navMeshSpacing = EditorGUILayout.FloatField("Ground Node Spacing", _navMeshSpacing);
+        if (GUILayout.Button("Auto-Generate from NavMesh", GUILayout.Height(24)))
+        {
+            RatGraphBaker.GenerateGroundNodesFromNavMesh(graph, _navMeshSpacing);
+        }
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.Space(5);
 
         if (GUILayout.Button("Bake All Jump Edges (Ghost Sim)", GUILayout.Height(30)))
         {
@@ -246,12 +330,20 @@ public class RatGraphEditor : Editor
             EditorUtility.SetDirty(graph);
         }
 
-        if (GUILayout.Button("Clear All Edges", GUILayout.Height(24)))
+        if (GUILayout.Button("Clear All Nodes & Edges", GUILayout.Height(24)))
         {
-            var edges = new List<RatEdge>(graph.Edges);
-            foreach (var e in edges)
-                graph.RemoveEdge(e);
-            EditorUtility.SetDirty(graph);
+            if (EditorUtility.DisplayDialog("Clear Graph", "Are you sure you want to delete all child nodes and edges?", "Yes", "No"))
+            {
+                var edges = new List<RatEdge>(graph.Edges);
+                foreach (var e in edges)
+                    graph.RemoveEdge(e);
+
+                for (int i = graph.transform.childCount - 1; i >= 0; i--)
+                    DestroyImmediate(graph.transform.GetChild(i).gameObject);
+
+                graph.RebuildFromChildren();
+                EditorUtility.SetDirty(graph);
+            }
         }
     }
 }
