@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using MIRA;
 
 public class JumpState : StateBase<MovementController>
@@ -18,13 +17,15 @@ public class JumpState : StateBase<MovementController>
 
 	public override void EnterState()
 	{
-		Debug.Log("Entering Jump State");
 		ClearTransitions();
 		_jumpTimer = 0f;
 		_jumpExecuted = false;
 		_jumpButtonUp = false;
 
-		AddTransition(StateMachine.LastState, controller =>
+		StateMachine.ConsumeJump();
+
+		var landTargetState = StateMachine.LastState is WallClimbState or WireClimbState or JumpState ? StateMachine.IdleState : StateMachine.LastState;
+		AddTransition(landTargetState, controller =>
 		{
 			if (!_jumpExecuted) return false;
 			var jumpEnded = controller.Velocity.y <= -0.0001f && controller.GroundHitInfo.distance < 0.4f;
@@ -35,7 +36,6 @@ public class JumpState : StateBase<MovementController>
 		AddTransition(StateMachine.WallClimbState, _ => StateMachine.IsWallInFront && !StateMachine.IsGrounded);
 
 		StateMachine.AnimationSyncer.PlayJumpAnimation();
-		StateMachine.JumpAction.canceled += OnJumpCancelAction;
 	}
 
 	public override void UpdateState()
@@ -45,23 +45,32 @@ public class JumpState : StateBase<MovementController>
 
 	public override void FixedUpdateState()
 	{
+		TryTransition();
+
 		var rb = StateMachine.Rb;
 		var animController = StateMachine.AnimationSyncer;
-		var input = StateMachine.MoveInput;
+		var moveDir = StateMachine.MoveDir;
 
-		var direction = new Vector3(StateMachine.CameraRig.forward.x, 0, StateMachine.CameraRig.forward.z);
-		var targetRotation = Quaternion.LookRotation(direction);
-		var yAngle = Vector2.SignedAngle(input, Vector2.up);
-		targetRotation *= Quaternion.Euler(0, yAngle, 0);
+		var direction = rb.transform.forward;
+		direction.y = 0f;
+		if (direction.sqrMagnitude > 0.001f) direction.Normalize();
+
+		if (moveDir.sqrMagnitude > 0.01f)
+		{
+			var targetHeading = new Vector3(moveDir.x, 0f, moveDir.z).normalized;
+			var targetRotation = Quaternion.LookRotation(targetHeading);
+			rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 6f * Time.fixedDeltaTime));
+			direction = targetHeading;
+		}
 
 		_jumpTimer += Time.fixedDeltaTime;
 		if (_jumpExecuted)
 		{
-			if (input.sqrMagnitude > 0.1f)
-			{
-				rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 6 * Time.fixedDeltaTime));
-			}
 			rb.AddForce(2.8f * direction, ForceMode.Acceleration);
+
+			if (StateMachine.RatInput != null && !StateMachine.RatInput.IsJumpHeld)
+				_jumpButtonUp = true;
+
 			if (!_jumpButtonUp)
 			{
 				rb.AddForce(0.4f * _jumpForce * (Vector3.up + 0.3f * rb.transform.forward), ForceMode.Force);
@@ -78,7 +87,6 @@ public class JumpState : StateBase<MovementController>
 
 	public override void ExitState()
 	{
-		StateMachine.JumpAction.canceled -= OnJumpCancelAction;
 		_jumpTimer = 0f;
 		_jumpExecuted = false;
 		_jumpButtonUp = false;
@@ -88,10 +96,5 @@ public class JumpState : StateBase<MovementController>
 	{
 		_jumpExecuted = true;
 		StateMachine.Rb.AddForce(_jumpForce * Vector3.up, ForceMode.Impulse);
-	}
-
-	private void OnJumpCancelAction(InputAction.CallbackContext _)
-	{
-		_jumpButtonUp = true;
 	}
 }

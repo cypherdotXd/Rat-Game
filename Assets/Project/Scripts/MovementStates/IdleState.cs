@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using MIRA;
 
 public class IdleState : StateBase<MovementController>
@@ -8,12 +7,11 @@ public class IdleState : StateBase<MovementController>
 
 	public override void EnterState()
 	{
-		Debug.Log("Entering IdleState");
 		ClearTransitions();
-		AddTransition(StateMachine.MoveState, _ => StateMachine.MoveInput.sqrMagnitude > 0.001f);
+		AddTransition(StateMachine.MoveState, _ => StateMachine.MoveDir.sqrMagnitude > 0.001f);
+		AddTransition(StateMachine.JumpState, c => c.HasJumpInput);
 
 		StateMachine.AnimationSyncer.PlayWalkRunAnimation(0, 0.4f);
-		StateMachine.JumpAction.performed += SwitchToJumpState;
 	}
 
 	public override void UpdateState()
@@ -21,13 +19,12 @@ public class IdleState : StateBase<MovementController>
 		TryTransition();
 	}
 
+	public override void FixedUpdateState()
+	{
+		TryTransition();
+	}
+
 	public override void ExitState()
 	{
-		StateMachine.JumpAction.performed -= SwitchToJumpState;
-	}
-	
-	private void SwitchToJumpState(InputAction.CallbackContext _)
-	{
-		StateMachine.SwitchState(StateMachine.JumpState);
 	}
 }

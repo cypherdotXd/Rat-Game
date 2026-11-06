@@ -14,6 +14,8 @@ public class WallClimbState : StateBase<MovementController>
 	private Vector3 _wallNormal;
 	private readonly LayerMask _layerMask;
 
+	public Vector3 WallNormal => _wallNormal;
+
 	public WallClimbState(MovementController machine, float timeOut, float climbForce = 1.5f) : base(machine)
 	{
 		_timeOut = timeOut;
@@ -41,7 +43,8 @@ public class WallClimbState : StateBase<MovementController>
 
 		StateMachine.AnimationSyncer.PlayWalkRunAnimation(1.5f);
 		StateMachine.AnimationSyncer.SetClimbing(true);
-		StateMachine.CameraMotion.StartDirectionFollow();
+		if (StateMachine.CameraMotion != null)
+			StateMachine.CameraMotion.StartDirectionFollow();
 	}
 
 	public override void FixedUpdateState()
@@ -52,7 +55,7 @@ public class WallClimbState : StateBase<MovementController>
 		var rb = StateMachine.Rb;
 		var collider = StateMachine.PlayerCollider;
 		var origin = StateMachine.Origin;
-		var input = StateMachine.MoveInput;
+		var moveDir = StateMachine.MoveDir;
 
 		_newWallInFront = Physics.Raycast(collider.bounds.center - 0.5f * collider.bounds.extents.y * Vector3.up,
 			climber.forward, out var newWallHitInfo, collider.bounds.extents.z + 0.05f, ~_layerMask);
@@ -66,15 +69,16 @@ public class WallClimbState : StateBase<MovementController>
 		_timer += Time.fixedDeltaTime;
 		_currentWallExists = Physics.Raycast(origin, -_wallDir, collider.bounds.extents.z + 0.2f, ~_layerMask);
 
-		_lateralDirection = Quaternion.AngleAxis(Mathf.Atan2(input.x, 1) * 0.08f * Mathf.Rad2Deg, climber.up) * _lateralDirection;
+		float lateral = Vector3.Dot(moveDir, climber.right);
+		_lateralDirection = Quaternion.AngleAxis(Mathf.Atan2(lateral, 1f) * 0.08f * Mathf.Rad2Deg, climber.up) * _lateralDirection;
 		var targetRotation = Quaternion.LookRotation(_lateralDirection, _wallNormal);
 		climber.rotation = Quaternion.Slerp(climber.rotation, targetRotation, 15f * Time.fixedDeltaTime);
 
 		// Move Upward
 		var climbDir = (-Vector3.Dot(Vector3.up, climber.forward) + 1f) / 2f;
 		climbDir = Mathf.Clamp(climbDir, 0.8f, 1f);
-		var moveDir = climber.forward - 0.4f * climber.up;
-		rb.linearVelocity = _climbForce * climbDir * moveDir;
+		var moveVec = climber.forward - 0.4f * climber.up;
+		rb.linearVelocity = _climbForce * climbDir * moveVec;
 	}
 
 	public override void ExitState()
@@ -90,11 +94,16 @@ public class WallClimbState : StateBase<MovementController>
 		var rb = StateMachine.Rb;
 
 		rb.isKinematic = false;
-		cameraMotion.EndDirectionFollow();
-		var forward = cameraRig.forward;
+		if (cameraMotion != null)
+			cameraMotion.EndDirectionFollow();
+
+		var forward = cameraRig != null ? cameraRig.forward : rb.transform.forward;
 		forward.y = 0;
-		var r = Quaternion.LookRotation(forward.normalized, StateMachine.GroundHitInfo.collider ? StateMachine.GroundHitInfo.normal : Vector3.up);
-		StateMachine.Rb.transform.DORotateQuaternion(r, 0.2f);
+		if (forward.sqrMagnitude > 0.001f)
+		{
+			var r = Quaternion.LookRotation(forward.normalized, StateMachine.GroundHitInfo.collider ? StateMachine.GroundHitInfo.normal : Vector3.up);
+			StateMachine.Rb.transform.DORotateQuaternion(r, 0.2f);
+		}
 	}
 
 	private void ChangeWall(RaycastHit newWallHitInfo)
