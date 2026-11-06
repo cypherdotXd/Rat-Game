@@ -82,7 +82,10 @@ public class RatGraph : MonoBehaviour
 
     private static bool IsObstacle(Collider hit, Collider surfaceA, Collider surfaceB)
     {
-        return hit != surfaceA && hit != surfaceB && !hit.isTrigger;
+        if (hit == null || hit.isTrigger) return false;
+        if (hit == surfaceA || hit == surfaceB) return false;
+        if (hit.GetComponentInParent<MovementController>() != null) return false;
+        return true;
     }
 
     [ContextMenu("Rebuild Node List From Children")]

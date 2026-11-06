@@ -102,12 +102,8 @@ public class MovementController : StateMachine<MovementController>
 	public float PathT { get; private set; }
 	private float _dismountCooldown;
 
-	private void Awake()
+	public void Initialize()
 	{
-#if UNITY_EDITOR
-		Cursor.lockState = CursorLockMode.Locked;
-#endif
-		Application.targetFrameRate = 60;
 		if (!_playerCollider) _playerCollider = GetComponent<CapsuleCollider>();
 		if (!_rb) _rb = GetComponent<Rigidbody>();
 		if (!_animationSyncer) _animationSyncer = GetComponent<StateAnimationSyncer>();
@@ -116,12 +112,27 @@ public class MovementController : StateMachine<MovementController>
 		if (_ratInput == null)
 			_ratInput = gameObject.AddComponent<PlayerInput>();
 
-		MoveState = new MoveState(this);
-		IdleState = new IdleState(this);
-		WallClimbState = new WallClimbState(this, _climbTimeout, _climbForce);
-		JumpState = new JumpState(this, _jumpForce);
-		FallingState = new FallingState(this);
-		WireClimbState = new WireClimbState(this);
+		if (MoveState == null)
+		{
+			MoveState = new MoveState(this);
+			IdleState = new IdleState(this);
+			WallClimbState = new WallClimbState(this, _climbTimeout, _climbForce);
+			JumpState = new JumpState(this, _jumpForce);
+			FallingState = new FallingState(this);
+			WireClimbState = new WireClimbState(this);
+		}
+
+		if (CurrentState == null)
+			SwitchState(MoveState);
+	}
+
+	private void Awake()
+	{
+#if UNITY_EDITOR
+		Cursor.lockState = CursorLockMode.Locked;
+#endif
+		Application.targetFrameRate = 60;
+		Initialize();
 	}
 
 	private void Start()
@@ -138,7 +149,7 @@ public class MovementController : StateMachine<MovementController>
 		Velocity = _rb.linearVelocity;
 	}
 
-	private void FixedUpdate()
+	public void StepPhysics()
 	{
 		UpdateGroundRaycast();
 		FixedUpdateState();
@@ -150,6 +161,11 @@ public class MovementController : StateMachine<MovementController>
 
 		Origin = _playerCollider.bounds.center - _playerCollider.bounds.extents.y * Vector3.up;
 		Velocity = _rb.linearVelocity;
+	}
+
+	private void FixedUpdate()
+	{
+		StepPhysics();
 	}
 
 	public void UpdateGroundRaycast()
