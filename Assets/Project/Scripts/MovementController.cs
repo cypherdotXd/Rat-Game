@@ -48,7 +48,7 @@ public class MovementController : StateMachine<MovementController>
 	public Vector2 MoveInput => new Vector2(MoveDir.x, MoveDir.z);
 	public bool HasJumpInput => _ratInput != null && _ratInput.Jump;
 
-	public bool IsAttached => CurrentState is WallClimbState or WireClimbState;
+	public bool IsAttached => CurrentState is WallClimbState || CurrentState is WireClimbState;
 
 	public Vector3 SurfaceNormal
 	{

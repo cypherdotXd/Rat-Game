@@ -35,15 +35,17 @@ public class PlayerInput : MonoBehaviour, IRatInput
 
     private void OnEnable()
     {
-        if (TouchInputManager.InputMain == null)
+        var actions = TouchInputManager.InputMain;
+        if (!actions.enabled)
         {
             TouchInputManager.InputMain = new PlayerControls().ratControls;
             TouchInputManager.InputMain.Enable();
+            actions = TouchInputManager.InputMain;
         }
 
-        _jumpAction = TouchInputManager.InputMain.jump;
-        _moveAction = TouchInputManager.InputMain.move;
-        _sprintAction = TouchInputManager.InputMain.sprint;
+        _jumpAction = actions.jump;
+        _moveAction = actions.move;
+        _sprintAction = actions.sprint;
 
         if (_jumpAction != null)
             _jumpAction.performed += OnJumpPerformed;
