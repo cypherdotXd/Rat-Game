@@ -25,6 +25,7 @@ public class JumpState : StateBase<MovementController>
 		StateMachine.ConsumeJump();
 
 		var landTargetState = StateMachine.LastState is WallClimbState or WireClimbState or JumpState ? StateMachine.IdleState : StateMachine.LastState;
+		AddTransition(StateMachine.WallClimbState, _ => StateMachine.IsWallInFront && !StateMachine.IsGrounded);
 		AddTransition(landTargetState, controller =>
 		{
 			if (!_jumpExecuted) return false;
@@ -33,7 +34,6 @@ public class JumpState : StateBase<MovementController>
 				controller.AnimationSyncer.PlayLandingAnimation();
 			return jumpEnded;
 		});
-		AddTransition(StateMachine.WallClimbState, _ => StateMachine.IsWallInFront && !StateMachine.IsGrounded);
 
 		StateMachine.AnimationSyncer.PlayJumpAnimation();
 	}

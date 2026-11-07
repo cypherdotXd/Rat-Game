@@ -1,20 +1,17 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using MIRA;
 
-// This will work as a central manager, dependencies provider.
 public class MovementController : StateMachine<MovementController>
 {
-	[Header("Deps")]
-	[SerializeField] private Transform _mesh;
-	[SerializeField] private LayerMask _layerMask;
-	[SerializeField] private AnimationCurve _inputSpeedCurve;
+	[Header("Dependencies")]
 	[SerializeField] private CameraMotionBasic _cameraMotion;
 	[SerializeField] private Transform _cameraRig;
 	[SerializeField] private Rigidbody _rb;
 	[SerializeField] private CapsuleCollider _playerCollider;
 	[SerializeField] private StateAnimationSyncer _animationSyncer;
+	[SerializeField] private LayerMask _layerMask;
+	[SerializeField] private AnimationCurve _inputSpeedCurve;
 
 	[Header("Movement Settings")]
 	[SerializeField] private float _walkSpeed = 0.7f;
@@ -25,14 +22,12 @@ public class MovementController : StateMachine<MovementController>
 	[SerializeField] private float _climbTimeout = 50f;
 	[SerializeField] private float _climbForce = 1.5f;
 
-	public Transform Mesh => _mesh;
-	public LayerMask LayerMask => _layerMask;
-	public AnimationCurve InputSpeedCurve => _inputSpeedCurve;
 	public CameraMotionBasic CameraMotion => _cameraMotion;
 	public Transform CameraRig => _cameraRig;
 	public Rigidbody Rb => _rb;
 	public CapsuleCollider PlayerCollider => _playerCollider;
 	public StateAnimationSyncer AnimationSyncer => _animationSyncer;
+	public AnimationCurve InputSpeedCurve => _inputSpeedCurve;
 
 	public float WalkSpeed => _walkSpeed;
 	public float Acceleration => _acceleration;
@@ -45,51 +40,24 @@ public class MovementController : StateMachine<MovementController>
 	private IRatInput _ratInput;
 	public IRatInput RatInput => _ratInput;
 	public Vector3 MoveDir => _ratInput != null ? _ratInput.MoveDir : Vector3.zero;
-	public Vector2 MoveInput => new Vector2(MoveDir.x, MoveDir.z);
 	public bool HasJumpInput => _ratInput != null && _ratInput.Jump;
+	public bool IsAttached => CurrentState is global::WallClimbState or global::WireClimbState;
 
-	public bool IsAttached => CurrentState is WallClimbState || CurrentState is WireClimbState;
+	public Vector3 SurfaceNormal =>
+		CurrentState is WallClimbState wallClimb && wallClimb.WallNormal != Vector3.zero ? wallClimb.WallNormal :
+		IsGrounded && GroundHitInfo.collider ? GroundHitInfo.normal : Vector3.up;
 
-	public Vector3 SurfaceNormal
-	{
-		get
-		{
-			if (CurrentState is WallClimbState wallClimb && wallClimb.WallNormal != Vector3.zero)
-				return wallClimb.WallNormal;
-			if (IsGrounded && GroundHitInfo.collider != null)
-				return GroundHitInfo.normal;
-			return Vector3.up;
-		}
-	}
+	public Collider SurfaceCollider =>
+		CurrentState is WallClimbState ? WallHitInfo.collider :
+		IsGrounded ? GroundHitInfo.collider : null;
 
-	public Collider SurfaceCollider
-	{
-		get
-		{
-			if (CurrentState is WallClimbState)
-				return WallHitInfo.collider;
-			if (IsGrounded)
-				return GroundHitInfo.collider;
-			return null;
-		}
-	}
+	public Vector3 Velocity => _rb ? _rb.linearVelocity : Vector3.zero;
+	public Vector3 Origin => _playerCollider ? _playerCollider.bounds.center - _playerCollider.bounds.extents.y * Vector3.up : transform.position;
 
-	public Vector3 Velocity;
-	public Vector3 Origin;
 	[NonSerialized] public RaycastHit GroundHitInfo;
 	[NonSerialized] public RaycastHit WallHitInfo;
 	public bool IsGrounded { get; private set; }
 	public bool IsWallInFront { get; private set; }
-
-	public bool ConsumeJump()
-	{
-		if (_ratInput != null && _ratInput.Jump)
-		{
-			_ratInput.Jump = false;
-			return true;
-		}
-		return false;
-	}
 
 	public MoveState MoveState { get; private set; }
 	public IdleState IdleState { get; private set; }
@@ -102,6 +70,13 @@ public class MovementController : StateMachine<MovementController>
 	public float PathT { get; private set; }
 	private float _dismountCooldown;
 
+	public bool ConsumeJump()
+	{
+		if (_ratInput == null || !_ratInput.Jump) return false;
+		_ratInput.Jump = false;
+		return true;
+	}
+
 	public void Initialize()
 	{
 		if (!_playerCollider) _playerCollider = GetComponent<CapsuleCollider>();
@@ -109,8 +84,7 @@ public class MovementController : StateMachine<MovementController>
 		if (!_animationSyncer) _animationSyncer = GetComponent<StateAnimationSyncer>();
 
 		_ratInput = GetComponent<IRatInput>();
-		if (_ratInput == null)
-			_ratInput = gameObject.AddComponent<PlayerInput>();
+		if (_ratInput == null) _ratInput = gameObject.AddComponent<PlayerInput>();
 
 		if (MoveState == null)
 		{
@@ -135,56 +109,36 @@ public class MovementController : StateMachine<MovementController>
 		Initialize();
 	}
 
-	private void Start()
-	{
-		SwitchState(MoveState);
-	}
-
 	private void Update()
 	{
 		if (_dismountCooldown > 0f)
 			_dismountCooldown -= Time.deltaTime;
 
 		UpdateState();
-		Velocity = _rb.linearVelocity;
 	}
+
+	private void FixedUpdate() => StepPhysics();
 
 	public void StepPhysics()
 	{
 		UpdateGroundRaycast();
-		FixedUpdateState();
-
 		IsWallInFront = Physics.Raycast(_playerCollider.bounds.center + 0.5f * _playerCollider.bounds.extents.y * Vector3.up,
-			transform.forward, out WallHitInfo, _playerCollider.bounds.extents.z + 0.15f, ~_layerMask, QueryTriggerInteraction.Collide);
-		Debug.DrawRay(_playerCollider.bounds.center + 0.5f * _playerCollider.bounds.extents.y * Vector3.up, 
-			transform.forward * (_playerCollider.bounds.extents.z + 0.15f), Color.chartreuse);
-
-		Origin = _playerCollider.bounds.center - _playerCollider.bounds.extents.y * Vector3.up;
-		Velocity = _rb.linearVelocity;
-	}
-
-	private void FixedUpdate()
-	{
-		StepPhysics();
+			transform.forward, out WallHitInfo, _playerCollider.bounds.extents.z + 0.15f, ~_layerMask, QueryTriggerInteraction.Ignore);
+		FixedUpdateState();
 	}
 
 	public void UpdateGroundRaycast()
 	{
-		var isGround = Physics.SphereCast(_playerCollider.bounds.center, 0.01f, -Vector3.up, out GroundHitInfo, 2f, ~_layerMask);
+		bool isGround = Physics.SphereCast(_playerCollider.bounds.center, 0.01f, -Vector3.up, out GroundHitInfo, 2f, ~_layerMask);
 		IsGrounded = isGround && GroundHitInfo.distance < 0.035f;
-		Debug.DrawLine(_playerCollider.bounds.center,
-			isGround ? GroundHitInfo.point : _playerCollider.bounds.center + Vector3.down,
-			isGround ? Color.red : Color.green, 
-			3);
 	}
 
 	public bool CanMountPath(PathClimb path, out float t)
 	{
 		t = 0f;
-		if (_dismountCooldown > 0f || CurrentState == WireClimbState) return false;
-		if (path.TryGetNearestPoint(transform.position, out t, out _, out float dist))
-			return dist <= path.MountDistance;
-		return false;
+		return _dismountCooldown <= 0f && CurrentState != WireClimbState &&
+		       path.TryGetNearestPoint(transform.position, out t, out _, out float dist) &&
+		       dist <= path.MountDistance;
 	}
 
 	public void MountPath(PathClimb path, float startT)
@@ -194,17 +148,14 @@ public class MovementController : StateMachine<MovementController>
 		SwitchState(WireClimbState);
 	}
 
-	public void SetDismountCooldown(float duration = 0.35f)
-	{
-		_dismountCooldown = duration;
-	}
+	public void SetDismountCooldown(float duration = 0.35f) => _dismountCooldown = duration;
 
 	private void OnTriggerStay(Collider other)
 	{
-		if (other.TryGetComponent<PathClimb>(out var path) || (path = other.GetComponentInParent<PathClimb>()))
+		if ((other.TryGetComponent<PathClimb>(out var path) || (path = other.GetComponentInParent<PathClimb>())) &&
+		    CanMountPath(path, out float t))
 		{
-			if (CanMountPath(path, out float t))
-				MountPath(path, t);
+			MountPath(path, t);
 		}
 	}
 }
